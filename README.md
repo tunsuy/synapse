@@ -1,6 +1,13 @@
-# Synapse
+<p align="center">
+  <img src="assets/logo.png" alt="Synapse Logo" width="200" />
+</p>
 
-> **个人知识中枢（Personal Knowledge Hub）** — 从各种 AI 助手对话中自动沉淀、整理、反哺知识，让你的每一次 AI 对话都成为知识复利。
+<h1 align="center">Synapse</h1>
+
+<p align="center">
+  <strong>个人知识中枢（Personal Knowledge Hub）</strong><br/>
+  从各种 AI 助手对话中自动沉淀、整理、反哺知识，让你的每一次 AI 对话都成为知识复利。
+</p>
 
 [![Go Version](https://img.shields.io/badge/Go-%3E%3D1.21-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)

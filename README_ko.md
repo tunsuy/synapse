@@ -1,6 +1,13 @@
-# Synapse
+<p align="center">
+  <img src="assets/logo.png" alt="Synapse Logo" width="200" />
+</p>
 
-> **개인 지식 허브(Personal Knowledge Hub)** — AI 어시스턴트와의 대화에서 자동으로 지식을 축적, 정리, 환원하여 모든 AI 대화를 지식 복리로 만듭니다.
+<h1 align="center">Synapse</h1>
+
+<p align="center">
+  <strong>개인 지식 허브(Personal Knowledge Hub)</strong><br/>
+  AI 어시스턴트와의 대화에서 자동으로 지식을 축적, 정리, 환원하여 모든 AI 대화를 지식 복리로 만듭니다.
+</p>
 
 [![Go Version](https://img.shields.io/badge/Go-%3E%3D1.21-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)

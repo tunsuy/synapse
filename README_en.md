@@ -1,6 +1,13 @@
-# Synapse
+<p align="center">
+  <img src="assets/logo.png" alt="Synapse Logo" width="200" />
+</p>
 
-> **Personal Knowledge Hub** — Automatically distill, organize, and reinvest knowledge from your AI conversations, turning every chat into compounding knowledge.
+<h1 align="center">Synapse</h1>
+
+<p align="center">
+  <strong>Personal Knowledge Hub</strong><br/>
+  Automatically distill, organize, and reinvest knowledge from your AI conversations, turning every chat into compounding knowledge.
+</p>
 
 [![Go Version](https://img.shields.io/badge/Go-%3E%3D1.21-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)

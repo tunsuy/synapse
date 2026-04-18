@@ -1,6 +1,13 @@
-# Synapse
+<p align="center">
+  <img src="assets/logo.png" alt="Synapse Logo" width="200" />
+</p>
 
-> **Hub de Connaissances Personnel (Personal Knowledge Hub)** — Distillez, organisez et réinvestissez automatiquement les connaissances de vos conversations IA, transformant chaque échange en capital de connaissances cumulé.
+<h1 align="center">Synapse</h1>
+
+<p align="center">
+  <strong>Hub de Connaissances Personnel (Personal Knowledge Hub)</strong><br/>
+  Distillez, organisez et réinvestissez automatiquement les connaissances de vos conversations IA, transformant chaque échange en capital de connaissances cumulé.
+</p>
 
 [![Go Version](https://img.shields.io/badge/Go-%3E%3D1.21-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)

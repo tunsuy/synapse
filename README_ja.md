@@ -1,6 +1,13 @@
-# Synapse
+<p align="center">
+  <img src="assets/logo.png" alt="Synapse Logo" width="200" />
+</p>
 
-> **パーソナルナレッジハブ（Personal Knowledge Hub）** — AIアシスタントとの会話から自動的にナレッジを蓄積・整理・活用し、すべてのAI会話をナレッジの複利に変えます。
+<h1 align="center">Synapse</h1>
+
+<p align="center">
+  <strong>パーソナルナレッジハブ（Personal Knowledge Hub）</strong><br/>
+  AIアシスタントとの会話から自動的にナレッジを蓄積・整理・活用し、すべてのAI会話をナレッジの複利に変えます。
+</p>
 
 [![Go Version](https://img.shields.io/badge/Go-%3E%3D1.21-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
