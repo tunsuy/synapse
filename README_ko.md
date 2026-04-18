@@ -13,7 +13,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**언어: [简体中文](README.md) | [English](README_en.md) | [日本語](README_ja.md) | 한국어 | [Français](README_fr.md) | [Español](README_es.md)**
+**언어: [简体中文](README_zh.md) | [English](README.md) | [日本語](README_ja.md) | 한국어 | [Français](README_fr.md) | [Español](README_es.md)**
 
 ---
 

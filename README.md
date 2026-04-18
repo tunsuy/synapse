@@ -5,207 +5,207 @@
 <h1 align="center">Synapse</h1>
 
 <p align="center">
-  <strong>个人知识中枢（Personal Knowledge Hub）</strong><br/>
-  从各种 AI 助手对话中自动沉淀、整理、反哺知识，让你的每一次 AI 对话都成为知识复利。
+  <strong>Personal Knowledge Hub</strong><br/>
+  Automatically distill, organize, and reinvest knowledge from your AI conversations, turning every chat into compounding knowledge.
 </p>
 
 [![Go Version](https://img.shields.io/badge/Go-%3E%3D1.21-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**语言: 简体中文 | [English](README_en.md) | [日本語](README_ja.md) | [한국어](README_ko.md) | [Français](README_fr.md) | [Español](README_es.md)**
+**Language: [简体中文](README_zh.md) | English | [日本語](README_ja.md) | [한국어](README_ko.md) | [Français](README_fr.md) | [Español](README_es.md)**
 
 ---
 
-## 🎯 为什么需要 Synapse？
+## 🎯 Why Synapse?
 
-我们在日常工作和学习中使用各种 AI 助手（ChatGPT、Claude、CodeBuddy、Gemini 等），每一次对话本质上都是知识积累。但现实是：
+We use various AI assistants (ChatGPT, Claude, CodeBuddy, Gemini, etc.) in our daily work and learning. Every conversation is essentially an accumulation of knowledge. But the reality is:
 
-- **知识碎片化** — 散落在各个 AI 助手中，难以回顾
-- **AI 认知割裂** — AI 对你的了解是碎片化的，每次对话都像第一次
-- **知识是"暗资产"** — 大量有价值的对话产物，用完就遗忘了
+- **Fragmented Knowledge** — Scattered across different AI assistants, hard to revisit
+- **Cognitive Isolation** — AI's understanding of you is fragmented; every conversation starts from scratch
+- **Dark Assets** — Valuable conversation outputs are used once and forgotten
 
-**Synapse 的目标**：让你与 AI 的每次对话都变成可沉淀、可检索、可反哺的知识资产。
+**Synapse's Goal**: Turn every AI conversation into knowledge assets that can be retained, retrieved, and reinvested.
 
-> "Wiki 是持久的、复利增长的知识产物。" — Andrej Karpathy
-
----
-
-## ✨ 核心特性
-
-- 🔌 **扩展点模型** — 六大独立扩展点（Source / Processor / Store / Indexer / Consumer / Auditor），按需组合、独立替换
-- 📥 **多源采集** — 支持从任意 AI 助手、RSS、Notion、播客等数据源零摩擦获取内容
-- 🧠 **智能处理** — AI 驱动的知识提取、分类、关联，自动将原始对话编译为结构化知识
-- 💾 **存储自主** — 数据存在你选择的任何后端（本地 / GitHub / S3 / WebDAV），完全自主可控
-- 🔍 **灵活检索** — 可插拔的检索引擎（BM25 / 向量检索 / 图谱遍历）
-- 📊 **多形态消费** — 知识可输出为静态网站、Obsidian Vault、Anki 闪卡、邮件周报等
-- 🔗 **双向链接** — `[[wiki-link]]` 格式，兼容 Obsidian，构建个人知识图谱
-- 📋 **Schema 驱动** — 通过 Schema 文件定义 AI 行为契约，修改 Schema 即修改所有 AI 助手的行为
-- 🧩 **插件生态** — 完整的插件管理 CLI，支持多来源安装，社区可贡献任意扩展点实现
+> "Wikis are persistent, compound-growth knowledge products." — Andrej Karpathy
 
 ---
 
-## 🏗️ 架构概览
+## ✨ Core Features
 
-Synapse 采用 **扩展点模型（Extension Point Model）**，以 Store 为底座，六个独立扩展点按需组合的星型架构：
+- 🔌 **Extension Point Model** — Six independent extension points (Source / Processor / Store / Indexer / Consumer / Auditor), composable and independently replaceable
+- 📥 **Multi-Source Ingestion** — Zero-friction content acquisition from any AI assistant, RSS, Notion, podcasts, etc.
+- 🧠 **Intelligent Processing** — AI-driven knowledge extraction, classification, and correlation; automatically compiles raw conversations into structured knowledge
+- 💾 **Storage Sovereignty** — Data resides in any backend you choose (Local / GitHub / S3 / WebDAV), fully self-controlled
+- 🔍 **Flexible Retrieval** — Pluggable retrieval engines (BM25 / Vector Search / Graph Traversal)
+- 📊 **Multi-Format Consumption** — Knowledge output as static sites, Obsidian Vaults, Anki flashcards, email digests, etc.
+- 🔗 **Bidirectional Links** — `[[wiki-link]]` format, Obsidian-compatible, building your personal knowledge graph
+- 📋 **Schema-Driven** — Define AI behavior contracts via Schema files; modify the Schema to change all AI assistants' behavior
+- 🧩 **Plugin Ecosystem** — Complete plugin management CLI, multi-source installation, community-contributed extension point implementations
+
+---
+
+## 🏗️ Architecture Overview
+
+Synapse adopts an **Extension Point Model** — a star-shaped architecture with Store as the foundation and six independent extension points composed on demand:
 
 ```
                     ┌─────────────┐
-                    │   Source     │  数据源（AI 对话 / RSS / Notion / ...）
+                    │   Source     │  Data Sources (AI Chat / RSS / Notion / ...)
                     └──────┬──────┘
                            │ RawContent
                            ▼
                     ┌─────────────┐
-                    │  Processor  │  处理引擎（Skill / MCP / LocalLLM / ...）
+                    │  Processor  │  Processing Engines (Skill / MCP / LocalLLM / ...)
                     └──────┬──────┘
                            │ KnowledgeFile
                            ▼
 ┌──────────────────────────────────────────────────────┐
-│                  Store（存储底座）                      │
+│                  Store (Storage Layer)                │
 │        Local FS / GitHub / S3 / WebDAV / ...         │
 └────────┬──────────────────┬──────────────────┬───────┘
          │                  │                  │
          ▼                  ▼                  ▼
   ┌─────────────┐   ┌─────────────┐   ┌───────────────┐
   │   Indexer    │   │   Auditor   │   │   Consumer    │
-  │   检索引擎   │   │   质量审计   │   │   消费端      │
+  │  Retrieval   │   │   Quality   │   │   Output      │
   └─────────────┘   └─────────────┘   └───────────────┘
 ```
 
-> 详细架构说明请参阅 [ARCHITECTURE.md](ARCHITECTURE.md)。
+> For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 环境要求
+### Requirements
 
 - Go >= 1.21
 
-### 安装
+### Installation
 
 ```bash
 go install github.com/tunsuy/synapse@latest
 ```
 
-### 初始化知识库
+### Initialize Knowledge Base
 
 ```bash
-# 初始化一个新的知识库
+# Initialize a new knowledge base
 synapse init ~/knowhub
 
-# 查看知识库结构
+# View knowledge base structure
 tree ~/knowhub
 ```
 
-### 知识库目录结构
+### Knowledge Base Directory Structure
 
 ```
 knowhub/
 ├── .synapse/
-│   ├── schema.yaml       # 知识规范（行为契约）
-│   └── config.yaml       # 扩展点配置
+│   ├── schema.yaml       # Knowledge schema (behavior contract)
+│   └── config.yaml       # Extension point configuration
 ├── profile/
-│   └── me.md             # 用户画像
-├── topics/               # 主题知识
+│   └── me.md             # User profile
+├── topics/               # Topic knowledge
 │   ├── golang/
 │   ├── architecture/
 │   └── ...
-├── entities/             # 实体页（人物、工具、项目）
-├── concepts/             # 概念页（技术概念、方法论）
-├── inbox/                # 待整理内容
-├── journal/              # 时间线日志
+├── entities/             # Entity pages (people, tools, projects)
+├── concepts/             # Concept pages (tech concepts, methodologies)
+├── inbox/                # Pending items
+├── journal/              # Timeline journal
 └── graph/
-    └── relations.json    # 知识关联图谱
+    └── relations.json    # Knowledge relation graph
 ```
 
 ---
 
-## 🔌 扩展点
+## 🔌 Extension Points
 
-| 扩展点 | 职责 | 默认实现 | 社区可贡献 |
-|--------|------|---------|-----------|
-| **Source** | 从外部获取原始内容 | CodeBuddy Skill | RSS / Notion / Twitter / 播客 / 微信... |
-| **Processor** | 原始内容 → 结构化知识 | Skill Processor | 本地 LLM / 规则引擎 / 混合处理... |
-| **Store** | 知识文件的 CRUD + 版本控制 | Local Store | GitHub / S3 / WebDAV / SQLite / IPFS... |
-| **Indexer** | 知识库检索 | BM25 Indexer | 向量检索 / 图谱遍历 / Elasticsearch... |
-| **Consumer** | 知识输出为各种消费形式 | Hugo 网站 | VitePress / Anki / 邮件 / TUI... |
-| **Auditor** | 知识库质量检查与修复 | Default Auditor | 自定义审计规则... |
+| Extension Point | Responsibility | Default Implementation | Community Contributions |
+|----------------|---------------|----------------------|------------------------|
+| **Source** | Fetch raw content from external sources | CodeBuddy Skill | RSS / Notion / Twitter / Podcast / WeChat... |
+| **Processor** | Raw content → Structured knowledge | Skill Processor | Local LLM / Rule Engine / Hybrid... |
+| **Store** | CRUD + version control for knowledge files | Local Store | GitHub / S3 / WebDAV / SQLite / IPFS... |
+| **Indexer** | Knowledge base retrieval | BM25 Indexer | Vector Search / Graph Traversal / Elasticsearch... |
+| **Consumer** | Output knowledge in various formats | Hugo Site | VitePress / Anki / Email / TUI... |
+| **Auditor** | Quality checks and repairs | Default Auditor | Custom audit rules... |
 
 ---
 
-## 🧩 插件管理
+## 🧩 Plugin Management
 
 ```bash
-# 查看已安装插件
+# List installed plugins
 synapse plugin list
 
-# 从 Go module 安装插件
+# Install from Go module
 synapse plugin install github.com/example/synapse-rss-source
 
-# 从 Git 仓库安装
+# Install from Git repository
 synapse plugin install --git https://github.com/example/synapse-vector-indexer.git
 
-# 从本地目录安装
+# Install from local directory
 synapse plugin install --local ./my-custom-processor
 
-# 启用 / 禁用插件
+# Enable / Disable plugins
 synapse plugin enable rss-source
 synapse plugin disable rss-source
 
-# 检查插件健康状态
+# Check plugin health
 synapse plugin doctor
 ```
 
 ---
 
-## 📅 路线图
+## 📅 Roadmap
 
-| 里程碑 | 内容 | 状态 |
-|--------|------|------|
-| **M1 基座搭建** | Schema 规范 + 扩展点接口 + CLI init | 🟡 待开始 |
-| **M2 Skill 集成** | 第一个 Source + Processor + Store，跑通闭环 | 🟡 待开始 |
-| **M3 MCP + 插件管理** | MCP Server + GitHub Store + BM25 Indexer + 插件 CLI | 🔵 规划中 |
-| **M4 多平台适配** | Claude Code / Cursor / ChatGPT Source | 🔵 规划中 |
-| **M5 Consumer 实现** | Hugo 网站 + Obsidian 兼容 + 知识图谱 | 🔵 规划中 |
-| **M6+ 社区生态** | 插件市场 + 全扩展点开放 + 社区共建 | 🔵 远期规划 |
+| Milestone | Content | Status |
+|-----------|---------|--------|
+| **M1 Foundation** | Schema spec + Extension point interfaces + CLI init | 🟡 Pending |
+| **M2 Skill Integration** | First Source + Processor + Store, end-to-end pipeline | 🟡 Pending |
+| **M3 MCP + Plugin Mgmt** | MCP Server + GitHub Store + BM25 Indexer + Plugin CLI | 🔵 Planned |
+| **M4 Multi-Platform** | Claude Code / Cursor / ChatGPT Source | 🔵 Planned |
+| **M5 Consumer Impl** | Hugo site + Obsidian compat + Knowledge graph | 🔵 Planned |
+| **M6+ Community** | Plugin marketplace + Full extension points + Community | 🔵 Long-term |
 
-> 详细路线图请参阅 [docs/roadmap.md](docs/roadmap.md)。
-
----
-
-## 🤝 参与贡献
-
-我们欢迎任何形式的贡献！无论是提交 Bug 报告、提出新功能建议，还是直接贡献代码。
-
-- 📖 阅读 [贡献指南](CONTRIBUTING.md) 了解如何参与
-- 🏛️ 阅读 [架构说明](ARCHITECTURE.md) 了解技术设计
-- 📋 阅读 [行为准则](CODE_OF_CONDUCT.md) 了解社区规范
-- 🗺️ 阅读 [路线图](docs/roadmap.md) 了解项目规划
-
-### 贡献方向
-
-每个扩展点都欢迎社区贡献新的实现：
-
-- 🔌 **Source 插件**：接入更多数据源（RSS、Notion、微信、播客...）
-- ⚙️ **Processor 插件**：支持更多处理引擎（本地 LLM、规则引擎...）
-- 💾 **Store 插件**：支持更多存储后端（S3、WebDAV、IPFS...）
-- 🔍 **Indexer 插件**：支持更多检索引擎（向量检索、图谱遍历...）
-- 📊 **Consumer 插件**：支持更多消费形式（VitePress、Anki、TUI...）
+> For the detailed roadmap, see [docs/roadmap.md](docs/roadmap.md).
 
 ---
 
-## 📄 许可证
+## 🤝 Contributing
 
-本项目基于 [Apache License 2.0](LICENSE) 开源。
+We welcome all forms of contributions! Whether it's submitting bug reports, suggesting new features, or contributing code directly.
+
+- 📖 Read the [Contributing Guide](CONTRIBUTING.md) to learn how to participate
+- 🏛️ Read the [Architecture Guide](ARCHITECTURE.md) to understand the technical design
+- 📋 Read the [Code of Conduct](CODE_OF_CONDUCT.md) for community standards
+- 🗺️ Read the [Roadmap](docs/roadmap.md) for project planning
+
+### Contribution Areas
+
+Every extension point welcomes community-contributed implementations:
+
+- 🔌 **Source Plugins**: Connect more data sources (RSS, Notion, WeChat, Podcasts...)
+- ⚙️ **Processor Plugins**: Support more processing engines (Local LLM, Rule Engine...)
+- 💾 **Store Plugins**: Support more storage backends (S3, WebDAV, IPFS...)
+- 🔍 **Indexer Plugins**: Support more retrieval engines (Vector Search, Graph Traversal...)
+- 📊 **Consumer Plugins**: Support more output formats (VitePress, Anki, TUI...)
 
 ---
 
-## 💬 联系我们
+## 📄 License
 
-- **Issues**：[GitHub Issues](https://github.com/tunsuy/synapse/issues)
-- **Discussions**：[GitHub Discussions](https://github.com/tunsuy/synapse/discussions)
+This project is licensed under the [Apache License 2.0](LICENSE).
 
 ---
 
-> *Synapse — 让每一次 AI 对话都成为知识复利。*
+## 💬 Contact
+
+- **Issues**: [GitHub Issues](https://github.com/tunsuy/synapse/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/tunsuy/synapse/discussions)
+
+---
+
+> *Synapse — Turn every AI conversation into compounding knowledge.*
