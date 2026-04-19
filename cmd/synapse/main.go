@@ -842,25 +842,27 @@ func installCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "install",
 		Usage: "安装 Skill 到 AI 助手的配置目录",
-		Description: `将 Synapse Skill 文件安装到目标 AI 助手的配置目录，
+		Description: `将 Synapse Skill 文件安装到目标 AI 助手的用户级配置目录，
 让 AI 助手在对话中自动帮你采集、整理、反哺知识。
 
+默认安装到用户主目录下（全局生效），所有项目共享。
+使用 --target 可指定安装到特定项目目录（仅该项目生效）。
+
 支持的 AI 助手：
-  - codebuddy : CodeBuddy（复制到 .codebuddy/skills/）
-  - claude    : Claude Code（复制到项目根目录作为 CLAUDE.md 的一部分）
-  - cursor    : Cursor（复制为 .cursorrules）
+  - codebuddy : CodeBuddy（安装到 ~/.codebuddy/skills/）
+  - claude    : Claude Code（安装到 ~/.claude/SYNAPSE.md）
+  - cursor    : Cursor（安装到 ~/.cursorrules）
 
 示例：
-  synapse install codebuddy
-  synapse install claude --target /path/to/project
-  synapse install cursor --target .
+  synapse install codebuddy              # 安装到用户主目录（全局）
+  synapse install claude                 # 安装到用户主目录（全局）
+  synapse install codebuddy --target .   # 安装到当前项目目录
   synapse install --list`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "target",
 				Aliases: []string{"t"},
-				Usage:   "目标项目目录（默认当前目录）",
-				Value:   ".",
+				Usage:   "目标目录（默认用户主目录，全局生效）",
 			},
 			&cli.BoolFlag{
 				Name:    "list",
@@ -877,10 +879,11 @@ func installAction(c *cli.Context) error {
 	if c.Bool("list") {
 		fmt.Println("📋 Supported AI assistants:")
 		fmt.Println()
-		fmt.Println("  codebuddy  — CodeBuddy（安装到 .codebuddy/skills/synapse-knowledge.md）")
-		fmt.Println("  claude     — Claude Code（安装到 SYNAPSE.md，需手动引用到 CLAUDE.md）")
-		fmt.Println("  cursor     — Cursor（安装到 .cursorrules）")
+		fmt.Println("  codebuddy  — CodeBuddy（安装到 ~/.codebuddy/skills/synapse-knowledge.md）")
+		fmt.Println("  claude     — Claude Code（安装到 ~/.claude/SYNAPSE.md）")
+		fmt.Println("  cursor     — Cursor（安装到 ~/.cursorrules）")
 		fmt.Println("\n使用方法：synapse install <assistant>")
+		fmt.Println("         synapse install <assistant> --target .  # 安装到当前项目目录")
 		return nil
 	}
 
@@ -889,11 +892,16 @@ func installAction(c *cli.Context) error {
 		return fmt.Errorf("请指定 AI 助手名称；运行 synapse install --list 查看支持列表")
 	}
 
+	// 默认安装到用户主目录（全局生效）
 	targetDir := c.String("target")
+	if targetDir == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("get user home dir: %w", err)
+		}
+		targetDir = home
+	}
 
-	// 定位 Skill 模板目录（相对于可执行文件所在目录或内嵌）
-	// M2 阶段先用可执行文件同级目录的 skills/ 或者通过 go:embed
-	// 这里我们直接使用内嵌的模板内容
 	switch strings.ToLower(assistant) {
 	case "codebuddy":
 		return installCodeBuddySkill(targetDir)
@@ -938,7 +946,12 @@ func installCodeBuddySkill(targetDir string) error {
 
 // installClaudeSkill 安装 Skill 到 Claude Code
 func installClaudeSkill(targetDir string) error {
-	destPath := filepath.Join(targetDir, "SYNAPSE.md")
+	claudeDir := filepath.Join(targetDir, ".claude")
+	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+		return fmt.Errorf("create claude dir: %w", err)
+	}
+
+	destPath := filepath.Join(claudeDir, "SYNAPSE.md")
 
 	content, err := findSkillTemplate("claude-code", "SYNAPSE.md")
 	if err != nil {
@@ -961,42 +974,25 @@ func installClaudeSkill(targetDir string) error {
 
 // installCursorSkill 安装 Skill 到 Cursor
 func installCursorSkill(targetDir string) error {
-	destPath := filepath.Join(targetDir, ".cursorrules")
+	destPath := filepath.Join(targetDir, ".cursor", "rules", "synapse-knowledge.mdc")
 
-	// 检查是否已有 .cursorrules
-	if _, err := os.Stat(destPath); err == nil {
-		// 追加模式
-		existing, readErr := os.ReadFile(destPath)
-		if readErr != nil {
-			return fmt.Errorf("read existing .cursorrules: %w", readErr)
-		}
-
-		content, findErr := findSkillTemplate("cursor", ".cursorrules")
-		if findErr != nil {
-			return fmt.Errorf("find skill template: %w", findErr)
-		}
-
-		merged := string(existing) + "\n\n" + string(content)
-		if err := os.WriteFile(destPath, []byte(merged), 0644); err != nil {
-			return fmt.Errorf("write skill file: %w", err)
-		}
-
-		fmt.Printf("✅ Cursor Skill 已追加到: %s\n", destPath)
-	} else {
-		content, findErr := findSkillTemplate("cursor", ".cursorrules")
-		if findErr != nil {
-			return fmt.Errorf("find skill template: %w", findErr)
-		}
-
-		if err := os.WriteFile(destPath, content, 0644); err != nil {
-			return fmt.Errorf("write skill file: %w", err)
-		}
-
-		fmt.Printf("✅ Cursor Skill 已安装到: %s\n", destPath)
+	destDir := filepath.Dir(destPath)
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		return fmt.Errorf("create cursor rules dir: %w", err)
 	}
 
+	content, findErr := findSkillTemplate("cursor", ".cursorrules")
+	if findErr != nil {
+		return fmt.Errorf("find skill template: %w", findErr)
+	}
+
+	if err := os.WriteFile(destPath, content, 0644); err != nil {
+		return fmt.Errorf("write skill file: %w", err)
+	}
+
+	fmt.Printf("✅ Cursor Skill 已安装到: %s\n", destPath)
 	fmt.Println("\n📖 使用方法：")
-	fmt.Println("   Cursor 会自动加载 .cursorrules 文件中的规则。")
+	fmt.Println("   Cursor 会自动加载 .cursor/rules/ 目录下的规则文件。")
 	fmt.Println("   在 Cursor 对话中，AI 会帮你管理知识。")
 	return nil
 }

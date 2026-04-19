@@ -5,6 +5,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -86,11 +87,57 @@ func Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("parse config file %s: %w", path, err)
 	}
 
+	// 解析配置中的环境变量占位符 ${ENV_VAR}
+	cfg.resolveEnvVars()
+
 	if err := cfg.validate(); err != nil {
 		return nil, fmt.Errorf("validate config: %w", err)
 	}
 
 	return &cfg, nil
+}
+
+// resolveEnvVars 递归解析配置中所有 ${ENV_VAR} 占位符为实际环境变量值
+func (c *Config) resolveEnvVars() {
+	// Store config
+	resolveEnvInMap(c.Synapse.Store.Config)
+
+	// Processor config
+	if c.Synapse.Processor != nil {
+		resolveEnvInMap(c.Synapse.Processor.Config)
+	}
+
+	// Indexer config
+	if c.Synapse.Indexer != nil {
+		resolveEnvInMap(c.Synapse.Indexer.Config)
+	}
+
+	// Auditor config
+	if c.Synapse.Auditor != nil {
+		resolveEnvInMap(c.Synapse.Auditor.Config)
+	}
+
+	// Sources config
+	for i := range c.Synapse.Sources {
+		resolveEnvInMap(c.Synapse.Sources[i].Config)
+	}
+
+	// Consumers config
+	for i := range c.Synapse.Consumers {
+		resolveEnvInMap(c.Synapse.Consumers[i].Config)
+	}
+}
+
+// resolveEnvInMap 将 map 中所有 ${ENV_VAR} 格式的字符串值替换为对应的环境变量值
+func resolveEnvInMap(m map[string]any) {
+	for key, val := range m {
+		if s, ok := val.(string); ok && strings.HasPrefix(s, "${") && strings.HasSuffix(s, "}") {
+			envName := s[2 : len(s)-1]
+			if envVal := os.Getenv(envName); envVal != "" {
+				m[key] = envVal
+			}
+		}
+	}
 }
 
 // validate 校验配置的合法性
