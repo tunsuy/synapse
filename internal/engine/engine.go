@@ -6,8 +6,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"path/filepath"
 
 	"github.com/tunsuy/synapse/internal/config"
+	"github.com/tunsuy/synapse/internal/schema"
 	"github.com/tunsuy/synapse/pkg/extension"
 	"github.com/tunsuy/synapse/pkg/model"
 )
@@ -16,6 +18,7 @@ import (
 // 负责读取配置 → 实例化扩展点 → 协调执行
 type Engine struct {
 	cfg       *config.Config
+	schema    *schema.Schema // 知识库行为契约
 	sources   []extension.Source
 	processor extension.Processor
 	store     extension.Store
@@ -31,12 +34,40 @@ func New(configPath string) (*Engine, error) {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
 
-	return NewFromConfig(cfg)
+	// 尝试加载 Schema（与 config.yaml 同目录下的 schema.yaml）
+	schemaPath := filepath.Join(filepath.Dir(configPath), "schema.yaml")
+	s, err := schema.Load(schemaPath)
+	if err != nil {
+		log.Printf("WARN: load schema: %v (using defaults)", err)
+		s = schema.Default()
+	}
+
+	return NewFromConfig(cfg, WithSchema(s))
+}
+
+// Option 是 Engine 的可选配置
+type Option func(*Engine)
+
+// WithSchema 设置 Schema
+func WithSchema(s *schema.Schema) Option {
+	return func(e *Engine) {
+		e.schema = s
+	}
 }
 
 // NewFromConfig 从配置对象创建引擎实例
-func NewFromConfig(cfg *config.Config) (*Engine, error) {
+func NewFromConfig(cfg *config.Config, opts ...Option) (*Engine, error) {
 	e := &Engine{cfg: cfg}
+
+	// 应用可选配置
+	for _, opt := range opts {
+		opt(e)
+	}
+
+	// 如果没有设置 Schema，使用默认值
+	if e.schema == nil {
+		e.schema = schema.Default()
+	}
 
 	var err error
 
@@ -116,16 +147,37 @@ func (e *Engine) Store() extension.Store {
 	return e.store
 }
 
+// Schema 返回引擎使用的 Schema 实例
+func (e *Engine) Schema() *schema.Schema {
+	return e.schema
+}
+
+// Config 返回引擎使用的配置
+func (e *Engine) Config() *config.Config {
+	return e.cfg
+}
+
+// CollectOptions 采集流程的选项
+type CollectOptions struct {
+	// FetchOpts 传递给 Source.Fetch 的选项
+	FetchOpts model.FetchOptions
+}
+
 // Collect 执行采集流程：Source.Fetch → Processor.Process → Store.Write
-func (e *Engine) Collect(ctx context.Context) error {
+func (e *Engine) Collect(ctx context.Context, opts ...CollectOptions) error {
 	if len(e.sources) == 0 {
 		return fmt.Errorf("no sources configured")
+	}
+
+	var fetchOpts model.FetchOptions
+	if len(opts) > 0 {
+		fetchOpts = opts[0].FetchOpts
 	}
 
 	// 1. 从所有启用的 Source 采集原始内容
 	var allRaw []model.RawContent
 	for _, src := range e.sources {
-		raw, err := src.Fetch(ctx, model.FetchOptions{})
+		raw, err := src.Fetch(ctx, fetchOpts)
 		if err != nil {
 			// 单个 Source 失败不阻断整体流程
 			log.Printf("WARN: source %s fetch failed: %v", src.Name(), err)

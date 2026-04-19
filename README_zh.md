@@ -88,23 +88,129 @@ Synapse 采用 **扩展点模型（Extension Point Model）**，以 Store 为底
 go install github.com/tunsuy/synapse@latest
 ```
 
-### 初始化知识库
+首次运行任意 synapse 命令时，会自动在 `~/.synapse/config.yaml` 创建全局配置模板：
 
 ```bash
-# 初始化一个新的知识库
-synapse init ~/knowhub
+# 触发自动创建配置模板
+synapse --version
 
-# 查看知识库结构
-tree ~/knowhub
+# 输出：
+# 📝 Created global config template: /Users/you/.synapse/config.yaml
+#    Please edit this file to configure your store and extensions.
+#    Then run 'synapse check' to verify your configuration.
 ```
 
-### 知识库目录结构
+### Step 1：配置扩展点
+
+编辑全局配置文件 `~/.synapse/config.yaml`，选择你的存储后端和其他扩展点。
+
+#### 方案 A：本地文件系统存储（推荐新手使用）
+
+```yaml
+synapse:
+  version: "1.0"
+
+  sources:
+    - name: "skill-source"
+      enabled: true
+
+  processor:
+    name: "skill-processor"
+
+  # 本地存储
+  store:
+    name: "local-store"
+    config:
+      path: "~/knowhub"        # 知识库本地路径
+```
+
+#### 方案 B：GitHub 仓库存储（适合云端同步）
+
+```yaml
+synapse:
+  version: "1.0"
+
+  sources:
+    - name: "skill-source"
+      enabled: true
+
+  processor:
+    name: "skill-processor"
+
+  # GitHub 存储
+  store:
+    name: "github-store"
+    config:
+      owner: "${GITHUB_OWNER}"   # 你的 GitHub 用户名
+      repo: "${GITHUB_REPO}"     # 知识库仓库名
+      token: "${GITHUB_TOKEN}"   # GitHub Personal Access Token
+      branch: "main"
+```
+
+> 💡 **提示**：使用 `${ENV_VAR}` 格式引用环境变量，避免在配置文件中硬编码敏感信息。
+
+### Step 2：验证配置
+
+```bash
+synapse check
+```
+
+输出示例：
+
+```
+🔍 Checking Synapse configuration...
+   Config: /Users/you/.synapse/config.yaml
+
+   ✅ Config file exists
+   ✅ Config file is valid YAML
+   ✅ Version: 1.0
+   ✅ Store: local-store
+   ✅ Store "local-store" is registered
+   ✅ Source: skill-source (registered)
+   ✅ Processor: skill-processor (registered)
+
+✅ Configuration is valid! You can now run 'synapse init' to initialize your knowledge base.
+```
+
+`check` 命令会检查以下内容：
+
+| 检查项 | 说明 |
+|--------|------|
+| 配置文件存在性 | `~/.synapse/config.yaml` 是否存在 |
+| YAML 合法性 | 文件是否为有效 YAML |
+| 必填字段 | `synapse.version`、`synapse.store.name` 是否填写 |
+| 扩展点注册 | 配置的 Store/Source/Processor 是否已注册到 Registry |
+| 环境变量 | `${ENV_VAR}` 占位符是否已设置对应环境变量 |
+
+### Step 3：初始化知识库
+
+```bash
+# 使用全局配置初始化
+synapse init
+
+# 指定知识库拥有者名称
+synapse init --name "你的名字"
+
+# 使用指定配置文件
+synapse init --config /path/to/config.yaml
+
+# 强制重新初始化（不会删除已有数据）
+synapse init --force
+```
+
+`init` 命令会根据配置中指定的 Store 后端自动执行初始化：
+
+| Store | 初始化行为 |
+|-------|-----------|
+| `local-store` | 在本地创建知识库目录结构和模板文件 |
+| `github-store` | 通过 GitHub API 在仓库中创建知识库骨架文件 |
+
+初始化完成后的知识库目录结构：
 
 ```
 knowhub/
 ├── .synapse/
-│   ├── schema.yaml       # 知识规范（行为契约）
-│   └── config.yaml       # 扩展点配置
+│   └── schema.yaml       # 知识规范（行为契约）
 ├── profile/
 │   └── me.md             # 用户画像
 ├── topics/               # 主题知识
@@ -118,6 +224,108 @@ knowhub/
 └── graph/
     └── relations.json    # 知识关联图谱
 ```
+
+> ⚠️ **幂等性**：如果知识库已经初始化过，`init` 命令会提示并跳过，使用 `--force` 可以强制重新初始化。
+
+### Step 4：安装 Skill 到 AI 助手
+
+Skill 是一段预置的 Prompt 指令，安装后 AI 助手会在对话中自动帮你采集、整理、反哺知识。
+
+```bash
+# 安装到 CodeBuddy（推荐）
+synapse install codebuddy
+
+# 安装到 Claude Code
+synapse install claude --target /path/to/project
+
+# 安装到 Cursor
+synapse install cursor
+
+# 查看所有支持的 AI 助手
+synapse install --list
+```
+
+安装后，你在 AI 助手中对话时可以使用以下触发词：
+
+| 你说的话 | AI 会做什么 |
+|---------|-----------|
+| "记一下" / "保存到知识库" | 立即采集当前对话中的知识 |
+| "检查知识库" / "审计" | 执行知识库健康检查 |
+| "我知道什么关于 X" | 从知识库中检索相关内容 |
+| "整理 inbox" | 帮你整理待处理内容 |
+
+### Step 5：日常使用
+
+#### 手动采集知识
+
+除了通过 Skill 自动采集，你也可以用 CLI 手动采集：
+
+```bash
+# 直接传入内容
+synapse collect --content "Go接口是隐式实现的" --title "Go Interfaces" \
+  --topics "Go" --concepts "Duck Typing"
+
+# 通过管道输入
+echo "学习笔记内容..." | synapse collect --topics "分布式系统" --entities "Raft"
+```
+
+#### 搜索知识库
+
+```bash
+# 关键词搜索
+synapse search goroutine
+
+# 按类型过滤
+synapse search --type topic "并发模型"
+
+# 限制返回数量
+synapse search --limit 5 golang
+```
+
+#### 审计知识库
+
+```bash
+synapse audit
+```
+
+审计报告包括：
+
+| 检查项 | 说明 |
+|--------|------|
+| 健康评分 | 综合评分（满分 100） |
+| Frontmatter 完整性 | 标题、类型等必填字段是否缺失 |
+| 断链检测 | `[[双向链接]]` 指向的页面是否存在 |
+| 孤儿页面 | 没有被任何其他页面链接到的页面 |
+| 知识库统计 | 文件数量、链接数量、按类型分布 |
+
+#### 管理扩展点插件
+
+```bash
+# 查看所有已注册的扩展点
+synapse plugin list
+```
+
+---
+
+## 📖 命令参考
+
+| 命令 | 说明 | 示例 |
+|------|------|------|
+| `synapse init` | 初始化知识库 | `synapse init --name "张三"` |
+| `synapse check` | 检查配置有效性 | `synapse check` |
+| `synapse collect` | 采集知识 | `synapse collect --content "..." --topics "Go"` |
+| `synapse search` | 搜索知识库 | `synapse search goroutine` |
+| `synapse audit` | 审计知识库健康状态 | `synapse audit` |
+| `synapse install` | 安装 Skill 到 AI 助手 | `synapse install codebuddy` |
+| `synapse plugin list` | 查看已注册插件 | `synapse plugin list` |
+
+### 全局参数
+
+| 参数 | 说明 |
+|------|------|
+| `--config`, `-c` | 指定配置文件路径（默认 `~/.synapse/config.yaml`） |
+| `--version`, `-v` | 显示版本号 |
+| `--help`, `-h` | 显示帮助信息 |
 
 ---
 
@@ -136,25 +344,19 @@ knowhub/
 
 ## 🧩 插件管理
 
+Synapse 通过插件系统扩展功能。M3 阶段将全面支持插件管理：
+
 ```bash
-# 查看已安装插件
+# 查看已注册的扩展点插件（已支持）
 synapse plugin list
 
-# 从 Go module 安装插件
-synapse plugin install github.com/example/synapse-rss-source
-
-# 从 Git 仓库安装
-synapse plugin install --git https://github.com/example/synapse-vector-indexer.git
-
-# 从本地目录安装
-synapse plugin install --local ./my-custom-processor
-
-# 启用 / 禁用插件
-synapse plugin enable rss-source
-synapse plugin disable rss-source
-
-# 检查插件健康状态
-synapse plugin doctor
+# 以下命令将在 M3 阶段实现：
+# synapse plugin install github.com/example/synapse-rss-source  # Go module 安装
+# synapse plugin install --git https://github.com/example/xxx.git  # Git 仓库安装
+# synapse plugin install --local ./my-custom-processor  # 本地目录安装
+# synapse plugin enable rss-source   # 启用插件
+# synapse plugin disable rss-source  # 禁用插件
+# synapse plugin doctor              # 检查插件健康状态
 ```
 
 ---
@@ -163,8 +365,8 @@ synapse plugin doctor
 
 | 里程碑 | 内容 | 状态 |
 |--------|------|------|
-| **M1 基座搭建** | Schema 规范 + 扩展点接口 + CLI init | 🟡 待开始 |
-| **M2 Skill 集成** | 第一个 Source + Processor + Store，跑通闭环 | 🟡 待开始 |
+| **M1 基座搭建** | Schema 规范 + 扩展点接口 + CLI init/check | ✅ 已完成 |
+| **M2 Skill 集成** | 第一个 Source + Processor + Store，跑通闭环 | ✅ 已完成 |
 | **M3 MCP + 插件管理** | MCP Server + GitHub Store + BM25 Indexer + 插件 CLI | 🔵 规划中 |
 | **M4 多平台适配** | Claude Code / Cursor / ChatGPT Source | 🔵 规划中 |
 | **M5 Consumer 实现** | Hugo 网站 + Obsidian 兼容 + 知识图谱 | 🔵 规划中 |

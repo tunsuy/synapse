@@ -32,16 +32,16 @@
 ```
                 2026 Q2                          2026 Q3                    2026 Q4+
 ├──────────────────────────────┼──────────────────────────────┼──────────────────────┤
-│  M1: 基座搭建    M2: Skill   │  M3: MCP Server   M4: 多平台 │  M5: 消费端    M6+   │
-│  (1周)          集成(2周)    │  + 插件管理(3周)  适配(2周)   │  实现(3周)    社区   │
+│  M1: 基座搭建 ✅  M2: Skill  │  M3: MCP Server   M4: 多平台 │  M5: 消费端    M6+   │
+│  (1周)          集成 ✅(2周) │  + 插件管理(3周)  适配(2周)   │  实现(3周)    社区   │
 │                              │                              │              生态    │
 │  ◆ Schema 规范              │  ◆ MCP Processor             │  ◆ Hugo 网站        │
 │  ◆ 扩展点接口定义            │  ◆ GitHub Store              │  ◆ Obsidian 兼容    │
-│  ◆ CLI init                 │  ◆ BM25 Indexer              │  ◆ 知识图谱         │
-│  ◆ 第一个 Source            │  ◆ Claude/Cursor Source      │  ◆ 插件市场         │
-│  ◆ 第一个 Processor         │  ◆ 默认 Auditor              │  ◆ Marketplace      │
-│                              │  ◆ 插件管理 CLI              │  ◆ 社区共建         │
-│                              │  ◆ 多来源安装                │                     │
+│  ◆ CLI init/check           │  ◆ BM25 Indexer              │  ◆ 知识图谱         │
+│  ◆ 全局配置模板              │  ◆ Claude/Cursor Source      │  ◆ 插件市场         │
+│  ◆ 第一个 Source            │  ◆ 默认 Auditor              │  ◆ Marketplace      │
+│  ◆ 第一个 Processor         │  ◆ 插件管理 CLI              │  ◆ 社区共建         │
+│  ◆ GitHub Store             │  ◆ 多来源安装                │                     │
 └──────────────────────────────┴──────────────────────────────┴──────────────────────┘
 ```
 
@@ -188,7 +188,7 @@ synapse:
 >
 > **周期**：1 周
 >
-> **状态**：🟡 待开始
+> **状态**：✅ 已完成
 
 ### 交付物
 
@@ -204,18 +204,20 @@ synapse:
 | 1.8 | 实体页（entities）模板 | 定义人物、工具、项目、组织等实体页面模板 | P0 |
 | 1.9 | 概念页（concepts）模板 | 定义技术概念、方法论、理论等概念页面模板 | P0 |
 | 1.10 | 主题知识（topics）格式规范 | 定义主题目录下知识文件的标准格式，支持 `[[双向链接]]` | P0 |
-| 1.11 | `synapse init` CLI 命令 | Go CLI 工具，初始化 knowhub 仓库（含 schema.yaml + config.yaml） | P0 |
+| 1.11 | `synapse init` CLI 命令 | Go CLI 工具，初始化 knowhub 仓库（通过 Store 接口实现，支持幂等检查和 --force） | P0 |
+| 1.11a | `synapse check` CLI 命令 | 验证全局配置文件的完整性和有效性（扩展点注册、环境变量检查等） | P0 |
+| 1.11b | 全局配置模板自动创建 | 首次运行自动创建 `~/.synapse/config.yaml` 配置模板，引导用户配置扩展点 | P0 |
 | 1.12 | knowhub 模板仓库 | 提供开箱即用的 knowhub 模板 | P1 |
 | 1.13 | **扩展点开发指南** | 编写文档，说明如何开发自定义扩展点插件（为社区共建做准备） | P1 |
 | 1.14 | README 文档 | synapse 和 knowhub 的使用说明 | P1 |
 
 ### 验收标准
 
-- [ ] 六个扩展点接口（Go Interface）定义完成，每个有清晰的输入/输出规范
-- [ ] 运行 `synapse init` 可以生成完整的 knowhub 目录结构（含 .synapse/schema.yaml + config.yaml）
-- [ ] 知识库结构规范文档完成，包含 7 种页面类型的模板定义
-- [ ] RawContent 格式规范清晰，第三方数据源可以据此接入
-- [ ] `[[双向链接]]` 格式兼容 Obsidian，可直接用 Obsidian 打开知识库
+- [x] 六个扩展点接口（Go Interface）定义完成，每个有清晰的输入/输出规范
+- [x] 运行 `synapse init` 可以生成完整的 knowhub 目录结构（含 .synapse/schema.yaml + config.yaml）
+- [x] 知识库结构规范文档完成，包含 7 种页面类型的模板定义
+- [x] RawContent 格式规范清晰，第三方数据源可以据此接入
+- [x] `[[双向链接]]` 格式兼容 Obsidian，可直接用 Obsidian 打开知识库
 - [ ] 扩展点开发指南可指导社区开发者贡献新实现
 
 ---
@@ -226,7 +228,7 @@ synapse:
 >
 > **周期**：2 周
 >
-> **状态**：🟡 待开始
+> **状态**：✅ 已完成
 
 ### 交付物
 
@@ -235,6 +237,7 @@ synapse:
 | 2.1 | **Source 参考实现：CodeBuddy Skill** | 实现 Source 接口，通过 Skill Prompt 驱动 AI 识别知识点、生成 RawContent | P0 |
 | 2.2 | **Processor 参考实现：Skill Processor** | 实现 Processor 接口，通过 Skill Prompt 驱动 AI 将 RawContent 处理为实体/概念/主题/双向链接 | P0 |
 | 2.3 | **Store 参考实现：Local Store** | 实现 Store 接口的本地文件系统版本（最简实现，为后续 GitHub Store 做基础） | P0 |
+| 2.3a | **Store 参考实现：GitHub Store** | 实现 Store 接口的 GitHub 版本（提前完成，通过 GitHub API 实现知识库远程存储） | P0 |
 | 2.4 | Skill — **反哺（Retrieve）** | AI 在对话中主动引用 knowhub 知识辅助回答，有价值的回答自动归档（知识自增长） | P0 |
 | 2.5 | Skill — **审计（Audit）** | 用户说"检查知识库"时，AI 执行健康检查：孤儿页面、断链、过时内容、重复知识 | P1 |
 | 2.6 | **Schema 加载机制** | Skill 启动时自动读取 `.synapse/schema.yaml`，让 AI 遵循知识库的行为契约 | P0 |
@@ -243,18 +246,22 @@ synapse:
 
 ### 验收标准
 
-- [ ] Source 接口有参考实现（CodeBuddy Skill），AI 能识别并采集知识到 inbox
-- [ ] Processor 接口有参考实现（Skill Processor），inbox 内容能被处理为实体/概念/主题/双向链接
-- [ ] Store 接口有参考实现（Local Store），知识文件可正确读写
-- [ ] AI 在新对话中能引用 knowhub 知识，有价值的回答自动归档（反哺+自增长）
-- [ ] 说"检查知识库"后，AI 能输出健康报告（审计）
-- [ ] 所有行为受 schema.yaml 约束，修改 schema 能改变 AI 行为
+- [x] Source 接口有参考实现（CodeBuddy Skill），AI 能识别并采集知识到 inbox
+- [x] Processor 接口有参考实现（Skill Processor），inbox 内容能被处理为实体/概念/主题/双向链接
+- [x] Store 接口有参考实现（Local Store），知识文件可正确读写
+- [x] Store 接口有第二个实现（GitHub Store），支持远程仓库存储
+- [x] Skill Prompt 模板已实现（CodeBuddy / Claude Code / Cursor），AI 可通过 Skill 在对话中反哺知识
+- [x] `synapse install` CLI 命令已实现，支持一键安装 Skill 到 AI 助手
+- [x] 说"检查知识库"后，AI 能输出健康报告（审计）
+- [x] 所有行为受 schema.yaml 约束，修改 schema 能改变 AI 行为
 
 ---
 
 ## M3：MCP Server 增强 + 插件管理 🔌
 
-> **目标**：MCP Server 作为第二个 Processor + GitHub Store 作为远程存储 + BM25 Indexer 作为第一个检索引擎 + **插件管理 CLI** 作为外部扩展基础设施，增强自动化能力并开启插件生态
+> **目标**：MCP Server 作为第二个 Processor + BM25 Indexer 作为第一个检索引擎 + **插件管理 CLI** 作为外部扩展基础设施，增强自动化能力并开启插件生态
+>
+> **注意**：GitHub Store 已在 M2 阶段提前实现
 >
 > **周期**：3 周
 >
@@ -429,14 +436,14 @@ M1 基座搭建（1周）— Schema 规范 + 扩展点接口定义
  └──→ M6+ 社区生态共建（持续）— 所有扩展点全面开放 + 插件市场（三阶段）
 ```
 
-**MVP = M1 + M2**（约 3 周），完成后即可在 CodeBuddy 中实际使用 Synapse 积累知识。
+**MVP = M1 + M2**（约 3 周），已完成。可在 CodeBuddy 中实际使用 Synapse 积累知识。
 
 **生态节奏**：每个里程碑产出新的扩展点参考实现，逐步验证接口设计，为社区共建铺路：
 
 | 里程碑 | 首次实现的扩展点 | 验证的接口 | 插件生态进展 |
 |--------|----------------|-----------|-------------|
-| M1 | — | Schema 规范 + 六个接口定义 | — |
-| M2 | Source / Processor / Store | 核心三件套跑通闭环 | — |
+| M1 ✅ | — | Schema 规范 + 六个接口定义 | — |
+| M2 ✅ | Source / Processor / Store（含 GitHub Store） | 核心三件套跑通闭环 | — |
 | M3 | Indexer / Auditor | 检索 + 审计能力就位 | **插件管理 CLI** + Layer 2 PluginAdapter + 多来源安装 |
 | M4 | 更多 Source | 验证 Source 接口的通用性 | 外部 Source 可作为插件开发 |
 | M5 | Consumer | 验证 Consumer 接口的通用性 | 外部 Consumer 可作为插件开发 |
@@ -519,6 +526,7 @@ M1 基座搭建（1周）— Schema 规范 + 扩展点接口定义
 
 | 日期 | 版本 | 变更内容 |
 |------|------|---------|
+| 2026-04-19 | v0.6 | M1/M2 标记为已完成；M2 增加 GitHub Store 交付物；更新里程碑总览和关键路径；M3 描述更正（GitHub Store 已提前完成） |
 | 2026-04-18 | v0.5 | 插件生态增强：M3 新增插件管理 CLI + 多来源安装 + PluginAdapter；M6+ 新增三阶段 Marketplace 演进规划 + 插件开发 SDK + 热重载（基于 OpenClaw / Claude Code 插件仓调研） |
 | 2026-04-18 | v0.4 | 架构再审视：从"四层协议栈"重构为"扩展点模型"，Store 为底座，五个独立扩展点按需组合 |
 | 2026-04-18 | v0.3 | 生态化架构设计：四层协议模型（SCOL/SCP/SSP/SDP）、插件体系、社区共建规划 |

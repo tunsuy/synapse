@@ -4,9 +4,11 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/tunsuy/synapse/pkg/extension"
 	"github.com/tunsuy/synapse/pkg/model"
 )
 
@@ -266,6 +268,183 @@ func TestLocalStore_Read_NotFound(t *testing.T) {
 	_, err := store.Read(ctx, "nonexistent.md")
 	if err == nil {
 		t.Fatal("Read() expected error for missing file")
+	}
+}
+
+func TestLocalStore_Init(t *testing.T) {
+	t.Parallel()
+	store, dir := setupTestStore(t)
+	ctx := context.Background()
+
+	schemaData := []byte("version: \"1.0\"\npage_types:\n  - name: topic\n    directory: topics/\n    description: 主题知识\n")
+
+	err := store.Init(ctx, extension.InitOptions{
+		Name:       "Test User",
+		SchemaData: schemaData,
+	})
+	if err != nil {
+		t.Fatalf("Init() error: %v", err)
+	}
+
+	// 验证目录结构
+	expectedDirs := []string{
+		".synapse", "profile", "topics", "entities",
+		"concepts", "inbox", "journal", "graph",
+	}
+	for _, d := range expectedDirs {
+		fullPath := filepath.Join(dir, d)
+		info, err := os.Stat(fullPath)
+		if err != nil {
+			t.Errorf("directory %q does not exist: %v", d, err)
+			continue
+		}
+		if !info.IsDir() {
+			t.Errorf("%q is not a directory", d)
+		}
+	}
+
+	// 验证 schema.yaml
+	schemaPath := filepath.Join(dir, ".synapse", "schema.yaml")
+	data, err := os.ReadFile(schemaPath)
+	if err != nil {
+		t.Fatalf("read schema: %v", err)
+	}
+	if !strings.Contains(string(data), "version:") {
+		t.Error("schema.yaml should contain 'version:'")
+	}
+
+	// 验证 profile/me.md
+	profilePath := filepath.Join(dir, "profile", "me.md")
+	data, err = os.ReadFile(profilePath)
+	if err != nil {
+		t.Fatalf("read profile: %v", err)
+	}
+	if !strings.Contains(string(data), "Test User") {
+		t.Error("profile/me.md should contain user name")
+	}
+
+	// 验证 .gitignore
+	gitignorePath := filepath.Join(dir, ".gitignore")
+	if _, err := os.Stat(gitignorePath); err != nil {
+		t.Error(".gitignore should exist")
+	}
+
+	// 验证 README.md
+	readmePath := filepath.Join(dir, "README.md")
+	data, err = os.ReadFile(readmePath)
+	if err != nil {
+		t.Fatalf("read README: %v", err)
+	}
+	if !strings.Contains(string(data), "Synapse") {
+		t.Error("README.md should mention Synapse")
+	}
+
+	// 验证 graph/relations.json
+	relationsPath := filepath.Join(dir, "graph", "relations.json")
+	data, err = os.ReadFile(relationsPath)
+	if err != nil {
+		t.Fatalf("read relations: %v", err)
+	}
+	if !strings.Contains(string(data), "\"nodes\"") {
+		t.Error("relations.json should contain 'nodes' field")
+	}
+
+	// 验证 .gitkeep 文件
+	gitkeepDirs := []string{"topics", "entities", "concepts", "inbox", "journal"}
+	for _, d := range gitkeepDirs {
+		gk := filepath.Join(dir, d, ".gitkeep")
+		if _, err := os.Stat(gk); err != nil {
+			t.Errorf(".gitkeep not found in %s: %v", d, err)
+		}
+	}
+}
+
+func TestLocalStore_Init_DefaultName(t *testing.T) {
+	t.Parallel()
+	store, dir := setupTestStore(t)
+	ctx := context.Background()
+
+	err := store.Init(ctx, extension.InitOptions{
+		Name:       "",
+		SchemaData: []byte("version: \"1.0\"\npage_types:\n  - name: topic\n    directory: topics/\n    description: test\n"),
+	})
+	if err != nil {
+		t.Fatalf("Init() error: %v", err)
+	}
+
+	// 空名称应使用默认名称 "Synapse User"
+	data, err := os.ReadFile(filepath.Join(dir, "profile", "me.md"))
+	if err != nil {
+		t.Fatalf("read profile: %v", err)
+	}
+	if !strings.Contains(string(data), "Synapse User") {
+		t.Error("profile should contain default 'Synapse User' when name is empty")
+	}
+}
+
+func TestLocalStore_Init_NoSchema(t *testing.T) {
+	t.Parallel()
+	store, dir := setupTestStore(t)
+	ctx := context.Background()
+
+	// 不传 SchemaData
+	err := store.Init(ctx, extension.InitOptions{
+		Name: "User",
+	})
+	if err != nil {
+		t.Fatalf("Init() error: %v", err)
+	}
+
+	// schema.yaml 不应被创建
+	schemaPath := filepath.Join(dir, ".synapse", "schema.yaml")
+	if _, err := os.Stat(schemaPath); !os.IsNotExist(err) {
+		t.Error("schema.yaml should not exist when SchemaData is empty")
+	}
+}
+
+func TestLocalStore_Initialized(t *testing.T) {
+	t.Parallel()
+	store, dir := setupTestStore(t)
+	ctx := context.Background()
+
+	// 未初始化时应返回 false
+	initialized, err := store.Initialized(ctx)
+	if err != nil {
+		t.Fatalf("Initialized() error: %v", err)
+	}
+	if initialized {
+		t.Error("Initialized() = true, want false before init")
+	}
+
+	// 初始化后应返回 true
+	err = store.Init(ctx, extension.InitOptions{
+		Name:       "User",
+		SchemaData: []byte("version: \"1.0\"\npage_types:\n  - name: topic\n    directory: topics/\n    description: test\n"),
+	})
+	if err != nil {
+		t.Fatalf("Init() error: %v", err)
+	}
+
+	initialized, err = store.Initialized(ctx)
+	if err != nil {
+		t.Fatalf("Initialized() error after init: %v", err)
+	}
+	if !initialized {
+		t.Error("Initialized() = false, want true after init")
+	}
+
+	// 手动删除 schema.yaml 后应返回 false
+	schemaPath := filepath.Join(dir, ".synapse", "schema.yaml")
+	if err := os.Remove(schemaPath); err != nil {
+		t.Fatalf("remove schema: %v", err)
+	}
+
+	initialized, err = store.Initialized(ctx)
+	if err != nil {
+		t.Fatalf("Initialized() error after remove: %v", err)
+	}
+	if initialized {
+		t.Error("Initialized() = true, want false after schema removal")
 	}
 }
 

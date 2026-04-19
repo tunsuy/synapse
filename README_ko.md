@@ -136,25 +136,19 @@ knowhub/
 
 ## 🧩 플러그인 관리
 
+Synapse는 플러그인 시스템을 통해 기능을 확장합니다. 완전한 플러그인 관리는 M3에서 제공 예정입니다:
+
 ```bash
-# 설치된 플러그인 목록 보기
+# 등록된 확장 플러그인 표시 (현재 사용 가능)
 synapse plugin list
 
-# Go module에서 설치
-synapse plugin install github.com/example/synapse-rss-source
-
-# Git 저장소에서 설치
-synapse plugin install --git https://github.com/example/synapse-vector-indexer.git
-
-# 로컬 디렉토리에서 설치
-synapse plugin install --local ./my-custom-processor
-
-# 플러그인 활성화 / 비활성화
-synapse plugin enable rss-source
-synapse plugin disable rss-source
-
-# 플러그인 헬스 체크
-synapse plugin doctor
+# 다음 명령어는 M3에서 구현 예정:
+# synapse plugin install github.com/example/synapse-rss-source  # Go module
+# synapse plugin install --git https://github.com/example/xxx.git  # Git 저장소
+# synapse plugin install --local ./my-custom-processor  # 로컬 디렉토리
+# synapse plugin enable rss-source   # 플러그인 활성화
+# synapse plugin disable rss-source  # 플러그인 비활성화
+# synapse plugin doctor              # 플러그인 헬스 체크
 ```
 
 ---
@@ -163,8 +157,8 @@ synapse plugin doctor
 
 | 마일스톤 | 내용 | 상태 |
 |---------|------|------|
-| **M1 기반 구축** | Schema 스펙 + 확장 포인트 인터페이스 + CLI init | 🟡 미착수 |
-| **M2 Skill 통합** | 첫 Source + Processor + Store, E2E 파이프라인 | 🟡 미착수 |
+| **M1 기반 구축** | Schema 스펙 + 확장 포인트 인터페이스 + CLI init/check | ✅ 완료 |
+| **M2 Skill 통합** | 첫 Source + Processor + Store, E2E 파이프라인 | ✅ 완료 |
 | **M3 MCP + 플러그인 관리** | MCP Server + GitHub Store + BM25 Indexer + 플러그인 CLI | 🔵 계획 중 |
 | **M4 멀티 플랫폼** | Claude Code / Cursor / ChatGPT Source | 🔵 계획 중 |
 | **M5 Consumer 구현** | Hugo 사이트 + Obsidian 호환 + 지식 그래프 | 🔵 계획 중 |

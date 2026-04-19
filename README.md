@@ -88,23 +88,129 @@ Synapse adopts an **Extension Point Model** — a star-shaped architecture with 
 go install github.com/tunsuy/synapse@latest
 ```
 
-### Initialize Knowledge Base
+On the first run of any synapse command, a global configuration template will be automatically created at `~/.synapse/config.yaml`:
 
 ```bash
-# Initialize a new knowledge base
-synapse init ~/knowhub
+# Trigger auto-creation of config template
+synapse --version
 
-# View knowledge base structure
-tree ~/knowhub
+# Output:
+# 📝 Created global config template: /Users/you/.synapse/config.yaml
+#    Please edit this file to configure your store and extensions.
+#    Then run 'synapse check' to verify your configuration.
 ```
 
-### Knowledge Base Directory Structure
+### Step 1: Configure Extensions
+
+Edit the global config file `~/.synapse/config.yaml` to select your storage backend and other extensions.
+
+#### Option A: Local Filesystem Store (Recommended for Beginners)
+
+```yaml
+synapse:
+  version: "1.0"
+
+  sources:
+    - name: "skill-source"
+      enabled: true
+
+  processor:
+    name: "skill-processor"
+
+  # Local storage
+  store:
+    name: "local-store"
+    config:
+      path: "~/knowhub"        # Local knowledge base path
+```
+
+#### Option B: GitHub Repository Store (For Cloud Sync)
+
+```yaml
+synapse:
+  version: "1.0"
+
+  sources:
+    - name: "skill-source"
+      enabled: true
+
+  processor:
+    name: "skill-processor"
+
+  # GitHub storage
+  store:
+    name: "github-store"
+    config:
+      owner: "${GITHUB_OWNER}"   # Your GitHub username
+      repo: "${GITHUB_REPO}"     # Knowledge base repository name
+      token: "${GITHUB_TOKEN}"   # GitHub Personal Access Token
+      branch: "main"
+```
+
+> 💡 **Tip**: Use `${ENV_VAR}` format to reference environment variables, avoiding hardcoded sensitive information in config files.
+
+### Step 2: Verify Configuration
+
+```bash
+synapse check
+```
+
+Sample output:
+
+```
+🔍 Checking Synapse configuration...
+   Config: /Users/you/.synapse/config.yaml
+
+   ✅ Config file exists
+   ✅ Config file is valid YAML
+   ✅ Version: 1.0
+   ✅ Store: local-store
+   ✅ Store "local-store" is registered
+   ✅ Source: skill-source (registered)
+   ✅ Processor: skill-processor (registered)
+
+✅ Configuration is valid! You can now run 'synapse init' to initialize your knowledge base.
+```
+
+The `check` command validates the following:
+
+| Check | Description |
+|-------|-------------|
+| Config file existence | Whether `~/.synapse/config.yaml` exists |
+| YAML validity | Whether the file is valid YAML |
+| Required fields | Whether `synapse.version` and `synapse.store.name` are set |
+| Extension registration | Whether configured Store/Source/Processor are registered in the Registry |
+| Environment variables | Whether `${ENV_VAR}` placeholders have corresponding env vars set |
+
+### Step 3: Initialize Knowledge Base
+
+```bash
+# Initialize using global config
+synapse init
+
+# Specify knowledge base owner name
+synapse init --name "Your Name"
+
+# Use a specific config file
+synapse init --config /path/to/config.yaml
+
+# Force re-initialization (existing data will NOT be deleted)
+synapse init --force
+```
+
+The `init` command automatically performs initialization based on the Store backend specified in your config:
+
+| Store | Initialization Behavior |
+|-------|------------------------|
+| `local-store` | Creates knowledge base directory structure and template files locally |
+| `github-store` | Creates knowledge base skeleton files in the repository via GitHub API |
+
+Knowledge base directory structure after initialization:
 
 ```
 knowhub/
 ├── .synapse/
-│   ├── schema.yaml       # Knowledge schema (behavior contract)
-│   └── config.yaml       # Extension point configuration
+│   └── schema.yaml       # Knowledge schema (behavior contract)
 ├── profile/
 │   └── me.md             # User profile
 ├── topics/               # Topic knowledge
@@ -118,6 +224,108 @@ knowhub/
 └── graph/
     └── relations.json    # Knowledge relation graph
 ```
+
+> ⚠️ **Idempotency**: If the knowledge base has already been initialized, `init` will display a warning and skip. Use `--force` to force re-initialization.
+
+### Step 4: Install Skill to AI Assistants
+
+A Skill is a pre-configured Prompt instruction file. Once installed, your AI assistant will automatically help you collect, organize, and retrieve knowledge during conversations.
+
+```bash
+# Install to CodeBuddy (recommended)
+synapse install codebuddy
+
+# Install to Claude Code
+synapse install claude --target /path/to/project
+
+# Install to Cursor
+synapse install cursor
+
+# List all supported AI assistants
+synapse install --list
+```
+
+After installation, you can use the following trigger phrases in your AI assistant:
+
+| You say | AI will do |
+|---------|------------|
+| "remember this" / "save to knowhub" | Immediately collect knowledge from the current conversation |
+| "check knowledge base" / "audit" | Run a knowledge base health check |
+| "what do I know about X" | Retrieve relevant content from the knowledge base |
+| "organize inbox" | Help you organize pending items |
+
+### Step 5: Daily Usage
+
+#### Manual Knowledge Collection
+
+In addition to automatic collection via Skill, you can also use the CLI to collect manually:
+
+```bash
+# Pass content directly
+synapse collect --content "Go interfaces are implicitly implemented" --title "Go Interfaces" \
+  --topics "Go" --concepts "Duck Typing"
+
+# Pipe input
+echo "Learning notes..." | synapse collect --topics "Distributed Systems" --entities "Raft"
+```
+
+#### Search the Knowledge Base
+
+```bash
+# Keyword search
+synapse search goroutine
+
+# Filter by type
+synapse search --type topic "concurrency model"
+
+# Limit results
+synapse search --limit 5 golang
+```
+
+#### Audit the Knowledge Base
+
+```bash
+synapse audit
+```
+
+The audit report includes:
+
+| Check | Description |
+|-------|-------------|
+| Health Score | Overall score (out of 100) |
+| Frontmatter Completeness | Whether required fields like title and type are present |
+| Broken Links | Whether `[[wiki-links]]` point to existing pages |
+| Orphan Pages | Pages not linked from any other page |
+| Statistics | File counts, link counts, distribution by type |
+
+#### Manage Extension Plugins
+
+```bash
+# List all registered extensions
+synapse plugin list
+```
+
+---
+
+## 📖 Command Reference
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `synapse init` | Initialize knowledge base | `synapse init --name "Your Name"` |
+| `synapse check` | Verify config validity | `synapse check` |
+| `synapse collect` | Collect knowledge | `synapse collect --content "..." --topics "Go"` |
+| `synapse search` | Search knowledge base | `synapse search goroutine` |
+| `synapse audit` | Audit knowledge base health | `synapse audit` |
+| `synapse install` | Install Skill to AI assistant | `synapse install codebuddy` |
+| `synapse plugin list` | List registered plugins | `synapse plugin list` |
+
+### Global Flags
+
+| Flag | Description |
+|------|-------------|
+| `--config`, `-c` | Config file path (default `~/.synapse/config.yaml`) |
+| `--version`, `-v` | Show version number |
+| `--help`, `-h` | Show help information |
 
 ---
 
@@ -136,25 +344,19 @@ knowhub/
 
 ## 🧩 Plugin Management
 
+Synapse extends functionality through a plugin system. Full plugin management will be available in M3:
+
 ```bash
-# List installed plugins
+# List registered extension plugins (available now)
 synapse plugin list
 
-# Install from Go module
-synapse plugin install github.com/example/synapse-rss-source
-
-# Install from Git repository
-synapse plugin install --git https://github.com/example/synapse-vector-indexer.git
-
-# Install from local directory
-synapse plugin install --local ./my-custom-processor
-
-# Enable / Disable plugins
-synapse plugin enable rss-source
-synapse plugin disable rss-source
-
-# Check plugin health
-synapse plugin doctor
+# The following commands will be implemented in M3:
+# synapse plugin install github.com/example/synapse-rss-source  # Go module
+# synapse plugin install --git https://github.com/example/xxx.git  # Git repo
+# synapse plugin install --local ./my-custom-processor  # Local directory
+# synapse plugin enable rss-source   # Enable plugin
+# synapse plugin disable rss-source  # Disable plugin
+# synapse plugin doctor              # Check plugin health
 ```
 
 ---
@@ -163,8 +365,8 @@ synapse plugin doctor
 
 | Milestone | Content | Status |
 |-----------|---------|--------|
-| **M1 Foundation** | Schema spec + Extension point interfaces + CLI init | 🟡 Pending |
-| **M2 Skill Integration** | First Source + Processor + Store, end-to-end pipeline | 🟡 Pending |
+| **M1 Foundation** | Schema spec + Extension point interfaces + CLI init/check | ✅ Done |
+| **M2 Skill Integration** | First Source + Processor + Store, end-to-end pipeline | ✅ Done |
 | **M3 MCP + Plugin Mgmt** | MCP Server + GitHub Store + BM25 Indexer + Plugin CLI | 🔵 Planned |
 | **M4 Multi-Platform** | Claude Code / Cursor / ChatGPT Source | 🔵 Planned |
 | **M5 Consumer Impl** | Hugo site + Obsidian compat + Knowledge graph | 🔵 Planned |

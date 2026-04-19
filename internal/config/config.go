@@ -104,8 +104,35 @@ func (c *Config) validate() error {
 	return nil
 }
 
-// Default 返回默认配置
-func Default(knowhubPath string) *Config {
+// Default 返回默认配置（使用 github-store，参数通过环境变量注入）
+func Default() *Config {
+	return &Config{
+		Synapse: SynapseConfig{
+			Version: "1.0",
+			Sources: []SourceConfig{
+				{Name: "skill-source"},
+			},
+			Processor: &ExtensionConfig{
+				Name: "skill-processor",
+			},
+			Store: ExtensionConfig{
+				Name: "github-store",
+				Config: map[string]any{
+					"owner":  "${GITHUB_OWNER}",
+					"repo":   "${GITHUB_REPO}",
+					"token":  "${GITHUB_TOKEN}",
+					"branch": "main",
+				},
+			},
+			Indexer:   nil,
+			Consumers: nil,
+			Auditor:   nil,
+		},
+	}
+}
+
+// DefaultLocal 返回使用 local-store 的默认配置（用于本地开发和测试）
+func DefaultLocal(knowhubPath string) *Config {
 	return &Config{
 		Synapse: SynapseConfig{
 			Version: "1.0",
@@ -121,7 +148,7 @@ func Default(knowhubPath string) *Config {
 					"path": knowhubPath,
 				},
 			},
-			Indexer: nil,
+			Indexer:   nil,
 			Consumers: nil,
 			Auditor:   nil,
 		},

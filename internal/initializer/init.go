@@ -143,7 +143,7 @@ func writeSchema(basePath string) error {
 
 // writeConfig 生成 .synapse/config.yaml
 func writeConfig(basePath string) error {
-	cfg := config.Default(basePath)
+	cfg := config.Default()
 	data, err := yaml.Marshal(cfg)
 	if err != nil {
 		return fmt.Errorf("marshal config: %w", err)

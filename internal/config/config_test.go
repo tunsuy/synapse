@@ -9,18 +9,30 @@ import (
 func TestDefault(t *testing.T) {
 	t.Parallel()
 
-	cfg := Default("/tmp/test-knowhub")
+	cfg := Default()
 
 	if cfg.Synapse.Version != "1.0" {
 		t.Errorf("Version = %q, want %q", cfg.Synapse.Version, "1.0")
 	}
-	if cfg.Synapse.Store.Name != "local-store" {
-		t.Errorf("Store.Name = %q, want %q", cfg.Synapse.Store.Name, "local-store")
+	if cfg.Synapse.Store.Name != "github-store" {
+		t.Errorf("Store.Name = %q, want %q", cfg.Synapse.Store.Name, "github-store")
 	}
 
-	path, ok := cfg.Synapse.Store.Config["path"].(string)
-	if !ok || path != "/tmp/test-knowhub" {
-		t.Errorf("Store.Config[\"path\"] = %q, want %q", path, "/tmp/test-knowhub")
+	owner, ok := cfg.Synapse.Store.Config["owner"].(string)
+	if !ok || owner != "${GITHUB_OWNER}" {
+		t.Errorf("Store.Config[\"owner\"] = %q, want %q", owner, "${GITHUB_OWNER}")
+	}
+	repo, ok := cfg.Synapse.Store.Config["repo"].(string)
+	if !ok || repo != "${GITHUB_REPO}" {
+		t.Errorf("Store.Config[\"repo\"] = %q, want %q", repo, "${GITHUB_REPO}")
+	}
+	token, ok := cfg.Synapse.Store.Config["token"].(string)
+	if !ok || token != "${GITHUB_TOKEN}" {
+		t.Errorf("Store.Config[\"token\"] = %q, want %q", token, "${GITHUB_TOKEN}")
+	}
+	branch, ok := cfg.Synapse.Store.Config["branch"].(string)
+	if !ok || branch != "main" {
+		t.Errorf("Store.Config[\"branch\"] = %q, want %q", branch, "main")
 	}
 
 	if len(cfg.Synapse.Sources) != 1 {
@@ -35,6 +47,24 @@ func TestDefault(t *testing.T) {
 	}
 	if cfg.Synapse.Processor.Name != "skill-processor" {
 		t.Errorf("Processor.Name = %q, want %q", cfg.Synapse.Processor.Name, "skill-processor")
+	}
+}
+
+func TestDefaultLocal(t *testing.T) {
+	t.Parallel()
+
+	cfg := DefaultLocal("/tmp/test-knowhub")
+
+	if cfg.Synapse.Version != "1.0" {
+		t.Errorf("Version = %q, want %q", cfg.Synapse.Version, "1.0")
+	}
+	if cfg.Synapse.Store.Name != "local-store" {
+		t.Errorf("Store.Name = %q, want %q", cfg.Synapse.Store.Name, "local-store")
+	}
+
+	path, ok := cfg.Synapse.Store.Config["path"].(string)
+	if !ok || path != "/tmp/test-knowhub" {
+		t.Errorf("Store.Config[\"path\"] = %q, want %q", path, "/tmp/test-knowhub")
 	}
 }
 
@@ -144,7 +174,7 @@ func TestLoad_MissingStoreName(t *testing.T) {
 func TestMarshalYAML(t *testing.T) {
 	t.Parallel()
 
-	cfg := Default("/tmp/test")
+	cfg := Default()
 	data, err := cfg.MarshalYAML()
 	if err != nil {
 		t.Fatalf("MarshalYAML() error: %v", err)

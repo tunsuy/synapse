@@ -37,6 +37,13 @@ type Store interface {
 	// Name 返回存储后端名称
 	Name() string
 
+	// Init 初始化知识库骨架（目录结构、模板文件等）
+	// 具体行为由各 Store 实现决定，如 local-store 创建本地目录，github-store 创建远端仓库
+	Init(ctx context.Context, opts InitOptions) error
+
+	// Initialized 检查知识库是否已经初始化过
+	Initialized(ctx context.Context) (bool, error)
+
 	// Read 读取知识文件
 	Read(ctx context.Context, path string) (model.KnowledgeFile, error)
 
@@ -51,6 +58,18 @@ type Store interface {
 
 	// Exists 检查文件是否存在
 	Exists(ctx context.Context, path string) (bool, error)
+}
+
+// InitOptions 知识库初始化选项
+type InitOptions struct {
+	// Name 知识库拥有者名称
+	Name string
+
+	// SchemaData schema.yaml 的内容
+	SchemaData []byte
+
+	// Force 是否强制覆盖已有结构
+	Force bool
 }
 
 // VersionedStore 支持版本控制的存储后端（可选能力，通过类型断言检查）

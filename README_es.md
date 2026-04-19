@@ -88,23 +88,129 @@ Synapse adopta un **Modelo de Puntos de Extensión (Extension Point Model)** —
 go install github.com/tunsuy/synapse@latest
 ```
 
-### Inicializar la Base de Conocimiento
+En la primera ejecución de cualquier comando synapse, se creará automáticamente una plantilla de configuración global en `~/.synapse/config.yaml`:
 
 ```bash
-# Inicializar una nueva base de conocimiento
-synapse init ~/knowhub
+# Activar la creación automática de la plantilla de configuración
+synapse --version
 
-# Ver la estructura de la base de conocimiento
-tree ~/knowhub
+# Salida:
+# 📝 Created global config template: /Users/you/.synapse/config.yaml
+#    Please edit this file to configure your store and extensions.
+#    Then run 'synapse check' to verify your configuration.
 ```
 
-### Estructura de Directorios
+### Paso 1: Configurar Extensiones
+
+Edita el archivo de configuración global `~/.synapse/config.yaml` para seleccionar tu backend de almacenamiento y otras extensiones.
+
+#### Opción A: Almacenamiento en Sistema de Archivos Local (Recomendado para principiantes)
+
+```yaml
+synapse:
+  version: "1.0"
+
+  sources:
+    - name: "skill-source"
+      enabled: true
+
+  processor:
+    name: "skill-processor"
+
+  # Almacenamiento local
+  store:
+    name: "local-store"
+    config:
+      path: "~/knowhub"        # Ruta local de la base de conocimiento
+```
+
+#### Opción B: Almacenamiento en Repositorio GitHub (Para sincronización en la nube)
+
+```yaml
+synapse:
+  version: "1.0"
+
+  sources:
+    - name: "skill-source"
+      enabled: true
+
+  processor:
+    name: "skill-processor"
+
+  # Almacenamiento GitHub
+  store:
+    name: "github-store"
+    config:
+      owner: "${GITHUB_OWNER}"   # Tu nombre de usuario de GitHub
+      repo: "${GITHUB_REPO}"     # Nombre del repositorio de la base de conocimiento
+      token: "${GITHUB_TOKEN}"   # GitHub Personal Access Token
+      branch: "main"
+```
+
+> 💡 **Consejo**: Usa el formato `${ENV_VAR}` para referenciar variables de entorno, evitando codificar información sensible en los archivos de configuración.
+
+### Paso 2: Verificar la Configuración
+
+```bash
+synapse check
+```
+
+Ejemplo de salida:
+
+```
+🔍 Checking Synapse configuration...
+   Config: /Users/you/.synapse/config.yaml
+
+   ✅ Config file exists
+   ✅ Config file is valid YAML
+   ✅ Version: 1.0
+   ✅ Store: local-store
+   ✅ Store "local-store" is registered
+   ✅ Source: skill-source (registered)
+   ✅ Processor: skill-processor (registered)
+
+✅ Configuration is valid! You can now run 'synapse init' to initialize your knowledge base.
+```
+
+El comando `check` valida lo siguiente:
+
+| Verificación | Descripción |
+|-------------|-------------|
+| Existencia del archivo de config | Si `~/.synapse/config.yaml` existe |
+| Validez YAML | Si el archivo es un YAML válido |
+| Campos requeridos | Si `synapse.version` y `synapse.store.name` están definidos |
+| Registro de extensiones | Si los Store/Source/Processor configurados están registrados en el Registry |
+| Variables de entorno | Si los marcadores `${ENV_VAR}` tienen variables de entorno correspondientes |
+
+### Paso 3: Inicializar la Base de Conocimiento
+
+```bash
+# Inicializar usando la configuración global
+synapse init
+
+# Especificar el nombre del propietario
+synapse init --name "Tu Nombre"
+
+# Usar un archivo de configuración específico
+synapse init --config /path/to/config.yaml
+
+# Forzar la re-inicialización (los datos existentes NO se eliminarán)
+synapse init --force
+```
+
+El comando `init` realiza automáticamente la inicialización basándose en el backend Store especificado en tu configuración:
+
+| Store | Comportamiento de inicialización |
+|-------|--------------------------------|
+| `local-store` | Crea la estructura de directorios y archivos plantilla localmente |
+| `github-store` | Crea los archivos esqueleto en el repositorio vía API de GitHub |
+
+Estructura de directorios después de la inicialización:
 
 ```
 knowhub/
 ├── .synapse/
-│   ├── schema.yaml       # Schema de conocimiento (contrato de comportamiento)
-│   └── config.yaml       # Configuración de puntos de extensión
+│   └── schema.yaml       # Schema de conocimiento (contrato de comportamiento)
 ├── profile/
 │   └── me.md             # Perfil de usuario
 ├── topics/               # Conocimiento por temas
@@ -118,6 +224,108 @@ knowhub/
 └── graph/
     └── relations.json    # Grafo de relaciones de conocimiento
 ```
+
+> ⚠️ **Idempotencia**: Si la base de conocimiento ya ha sido inicializada, `init` mostrará una advertencia y se saltará. Usa `--force` para forzar la re-inicialización.
+
+### Paso 4: Instalar Skill en Asistentes IA
+
+Un Skill es un archivo de instrucciones Prompt pre-configurado. Una vez instalado, tu asistente IA te ayudará automáticamente a recopilar, organizar y reutilizar conocimiento durante las conversaciones.
+
+```bash
+# Instalar en CodeBuddy (recomendado)
+synapse install codebuddy
+
+# Instalar en Claude Code
+synapse install claude --target /path/to/project
+
+# Instalar en Cursor
+synapse install cursor
+
+# Listar todos los asistentes IA soportados
+synapse install --list
+```
+
+Después de la instalación, puedes usar las siguientes frases activadoras:
+
+| Tú dices | La IA hace |
+|----------|-----------|
+| "recuerda esto" / "guarda en la base" | Recopila inmediatamente conocimiento de la conversación |
+| "revisa la base de conocimiento" / "auditoría" | Ejecuta una verificación de salud |
+| "¿qué sé sobre X?" | Busca contenido relevante |
+| "organiza el inbox" | Ayuda a organizar elementos pendientes |
+
+### Paso 5: Uso Diario
+
+#### Recopilación Manual de Conocimiento
+
+Además de la recopilación automática vía Skill, también puedes usar el CLI manualmente:
+
+```bash
+# Pasar contenido directamente
+synapse collect --content "Las interfaces de Go se implementan implícitamente" --title "Go Interfaces" \
+  --topics "Go" --concepts "Duck Typing"
+
+# Entrada por pipe
+echo "Notas de aprendizaje..." | synapse collect --topics "Sistemas Distribuidos" --entities "Raft"
+```
+
+#### Buscar en la Base de Conocimiento
+
+```bash
+# Búsqueda por palabra clave
+synapse search goroutine
+
+# Filtrar por tipo
+synapse search --type topic "modelo de concurrencia"
+
+# Limitar resultados
+synapse search --limit 5 golang
+```
+
+#### Auditar la Base de Conocimiento
+
+```bash
+synapse audit
+```
+
+El informe de auditoría incluye:
+
+| Verificación | Descripción |
+|-------------|-------------|
+| Puntuación de salud | Puntuación global (sobre 100) |
+| Completitud Frontmatter | Si los campos requeridos como título y tipo están presentes |
+| Enlaces rotos | Si los `[[wiki-links]]` apuntan a páginas existentes |
+| Páginas huérfanas | Páginas no enlazadas desde otras páginas |
+| Estadísticas | Cantidad de archivos, enlaces, distribución por tipo |
+
+#### Gestionar Plugins de Extensión
+
+```bash
+# Listar todas las extensiones registradas
+synapse plugin list
+```
+
+---
+
+## 📖 Referencia de Comandos
+
+| Comando | Descripción | Ejemplo |
+|---------|-------------|---------|
+| `synapse init` | Inicializar base de conocimiento | `synapse init --name "Juan"` |
+| `synapse check` | Verificar validez de la config | `synapse check` |
+| `synapse collect` | Recopilar conocimiento | `synapse collect --content "..." --topics "Go"` |
+| `synapse search` | Buscar en la base | `synapse search goroutine` |
+| `synapse audit` | Auditar salud de la base | `synapse audit` |
+| `synapse install` | Instalar Skill en asistente IA | `synapse install codebuddy` |
+| `synapse plugin list` | Listar plugins registrados | `synapse plugin list` |
+
+### Opciones Globales
+
+| Opción | Descripción |
+|--------|-------------|
+| `--config`, `-c` | Ruta del archivo de config (por defecto `~/.synapse/config.yaml`) |
+| `--version`, `-v` | Mostrar número de versión |
+| `--help`, `-h` | Mostrar información de ayuda |
 
 ---
 

@@ -33,6 +33,10 @@ type mockStore struct {
 }
 
 func (m *mockStore) Name() string { return m.name }
+func (m *mockStore) Init(_ context.Context, _ InitOptions) error {
+	return nil
+}
+func (m *mockStore) Initialized(_ context.Context) (bool, error) { return false, nil }
 func (m *mockStore) Read(_ context.Context, _ string) (model.KnowledgeFile, error) {
 	return model.KnowledgeFile{}, nil
 }

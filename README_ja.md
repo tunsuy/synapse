@@ -136,25 +136,19 @@ knowhub/
 
 ## 🧩 プラグイン管理
 
+Synapse はプラグインシステムを通じて機能を拡張します。完全なプラグイン管理は M3 で提供予定です：
+
 ```bash
-# インストール済みプラグインを表示
+# 登録済みの拡張プラグインを表示（利用可能）
 synapse plugin list
 
-# Go module からインストール
-synapse plugin install github.com/example/synapse-rss-source
-
-# Git リポジトリからインストール
-synapse plugin install --git https://github.com/example/synapse-vector-indexer.git
-
-# ローカルディレクトリからインストール
-synapse plugin install --local ./my-custom-processor
-
-# プラグインの有効化 / 無効化
-synapse plugin enable rss-source
-synapse plugin disable rss-source
-
-# プラグインのヘルスチェック
-synapse plugin doctor
+# 以下のコマンドは M3 で実装予定：
+# synapse plugin install github.com/example/synapse-rss-source  # Go module
+# synapse plugin install --git https://github.com/example/xxx.git  # Git リポジトリ
+# synapse plugin install --local ./my-custom-processor  # ローカルディレクトリ
+# synapse plugin enable rss-source   # プラグイン有効化
+# synapse plugin disable rss-source  # プラグイン無効化
+# synapse plugin doctor              # プラグインヘルスチェック
 ```
 
 ---
@@ -163,8 +157,8 @@ synapse plugin doctor
 
 | マイルストーン | 内容 | ステータス |
 |-------------|------|----------|
-| **M1 基盤構築** | Schemaスペック + 拡張ポイントインターフェース + CLI init | 🟡 未着手 |
-| **M2 Skill統合** | 初のSource + Processor + Store、E2Eパイプライン | 🟡 未着手 |
+| **M1 基盤構築** | Schemaスペック + 拡張ポイントインターフェース + CLI init/check | ✅ 完了 |
+| **M2 Skill統合** | 初のSource + Processor + Store、E2Eパイプライン | ✅ 完了 |
 | **M3 MCP + プラグイン管理** | MCP Server + GitHub Store + BM25 Indexer + プラグインCLI | 🔵 計画中 |
 | **M4 マルチプラットフォーム** | Claude Code / Cursor / ChatGPT Source | 🔵 計画中 |
 | **M5 Consumer実装** | Hugo サイト + Obsidian互換 + ナレッジグラフ | 🔵 計画中 |
