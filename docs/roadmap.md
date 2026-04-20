@@ -49,7 +49,7 @@
 
 ## 🧬 生态化架构：扩展点模型（Extension Point Model）
 
-> **核心思想**：Synapse = 知识规范（Schema）+ 存储底座（Store）+ 五个独立扩展点。不是固定分层的协议栈，而是以 Store 为中心、多个扩展点按需组合的星型架构。
+> **核心思想**：Synapse = 知识规范（Schema）+ 存储底座（Store）+ 六个独立扩展点（Source / Processor / Indexer / Consumer / Auditor + Store 本身）。不是固定分层的协议栈，而是以 Store 为中心、多个扩展点按需组合的星型架构。
 
 ### 架构全景
 
@@ -112,7 +112,7 @@
 | **展示** | 只覆盖"人看" | **Consumer 扩展点**，覆盖所有消费形式 |
 | **模块关系** | 层与层严格上下级 | **按需组合**，扩展点之间不强制依赖 |
 
-### 五个扩展点详解
+### 六个扩展点详解
 
 | 扩展点 | Go 接口 | 职责 | 官方参考实现 | 社区可共建 |
 |--------|---------|------|-------------|-----------|
@@ -273,7 +273,7 @@ synapse:
 |---|------|------|--------|
 | 3.1 | MCP Server 基础框架 | Go 实现的 MCP Server，支持 stdio 和 SSE 两种传输方式 | P0 |
 | 3.2 | **Processor 实现：MCP Processor** | 通过 MCP 工具暴露核心操作：`collect` / `process` / `search` / `audit` | P0 |
-| 3.3 | **Store 实现：GitHub Store** | 实现 Store 接口的 GitHub 版本，自动 git add/commit/push | P0 |
+| 3.3 | ~~**Store 实现：GitHub Store**~~ | ~~实现 Store 接口的 GitHub 版本，自动 git add/commit/push~~ **已在 M2 提前完成** | ~~P0~~ |
 | 3.4 | **Indexer 实现：BM25 Indexer** | 实现 Indexer 接口，基于 BM25 的轻量级全文搜索 | P0 |
 | 3.5 | **Auditor 实现：Default Auditor** | 实现 Auditor 接口，断链检测、孤儿页面、过时内容检查 | P1 |
 | 3.6 | 采集类 MCP 工具 | `push_conversation`、`push_knowledge`：生成 RawContent 推入系统 | P0 |
@@ -526,9 +526,10 @@ M1 基座搭建（1周）— Schema 规范 + 扩展点接口定义
 
 | 日期 | 版本 | 变更内容 |
 |------|------|---------|
+| 2026-04-20 | v0.7 | 修正扩展点数量描述（五个→六个）；M3 标记 GitHub Store 已提前完成；文档完善（SECURITY.md + GitHub 模板） |
 | 2026-04-19 | v0.6 | M1/M2 标记为已完成；M2 增加 GitHub Store 交付物；更新里程碑总览和关键路径；M3 描述更正（GitHub Store 已提前完成） |
 | 2026-04-18 | v0.5 | 插件生态增强：M3 新增插件管理 CLI + 多来源安装 + PluginAdapter；M6+ 新增三阶段 Marketplace 演进规划 + 插件开发 SDK + 热重载（基于 OpenClaw / Claude Code 插件仓调研） |
-| 2026-04-18 | v0.4 | 架构再审视：从"四层协议栈"重构为"扩展点模型"，Store 为底座，五个独立扩展点按需组合 |
+| 2026-04-18 | v0.4 | 架构再审视：从"四层协议栈"重构为"扩展点模型"，Store 为底座，六个独立扩展点按需组合 |
 | 2026-04-18 | v0.3 | 生态化架构设计：四层协议模型（SCOL/SCP/SSP/SDP）、插件体系、社区共建规划 |
 | 2026-04-18 | v0.2 | 融合 Karpathy LLM Wiki 思想：Schema 驱动、知识编译、四大操作、双向链接、Lint 审计 |
 | 2026-04-18 | v0.1 | 初始 Roadmap，基于产品讨论整理 |

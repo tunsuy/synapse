@@ -384,6 +384,7 @@ synapse plugin list
 - 🏛️ 阅读 [架构说明](ARCHITECTURE.md) 了解技术设计
 - 📋 阅读 [行为准则](CODE_OF_CONDUCT.md) 了解社区规范
 - 🗺️ 阅读 [路线图](docs/roadmap.md) 了解项目规划
+- 🔐 阅读 [安全策略](SECURITY.md) 了解漏洞报告流程
 
 ### 贡献方向
 

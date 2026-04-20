@@ -384,6 +384,7 @@ We welcome all forms of contributions! Whether it's submitting bug reports, sugg
 - 🏛️ Read the [Architecture Guide](ARCHITECTURE.md) to understand the technical design
 - 📋 Read the [Code of Conduct](CODE_OF_CONDUCT.md) for community standards
 - 🗺️ Read the [Roadmap](docs/roadmap.md) for project planning
+- 🔐 Read the [Security Policy](SECURITY.md) for vulnerability reporting
 
 ### Contribution Areas
 

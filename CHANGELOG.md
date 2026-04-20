@@ -18,11 +18,24 @@
   - 6 个里程碑规划（M1-M6+）
   - 插件生态设计（三阶段 Marketplace 演进）
 
+- **Schema 增强**
+  - `PageTypeDefinition` 新增 `Emoji` 字段（目录展示用的 emoji 图标）
+  - `PageTypeDefinition` 新增 `Example` 字段（示例文件名，用于 README 表格展示）
+  - Default Schema 为所有 7 种页面类型填充了默认 Emoji 和 Example
+
+- **README 动态生成**
+  - Store `tmpl/readme.go` 支持从 Schema 的 `PageTypeDefinition` 动态生成知识库目录结构表格
+  - 知识库 README.md 中的目录表格不再硬编码，由 Schema 驱动生成
+
 - **Skill Prompt 模板**（`skills/`）
   - CodeBuddy Skill（`skills/codebuddy/synapse-knowledge.md`）：最详细版本，包含页面类型规范、采集决策规则、触发词、示例命令
-  - Claude Code Skill（`skills/claude-code/SYNAPSE.md`）：适配 CLAUDE.md 引用机制的简洁版
+  - Claude Code Skill（`skills/claude/SYNAPSE.md`）：适配 CLAUDE.md 引用机制的简洁版
   - Cursor Skill（`skills/cursor/.cursorrules`）：适配 .cursorrules 的精简版
+  - 通用模板（`skills/common/`）：共享知识规范定义
   - 三个模板均定义了 Retrieve（反哺）和 Collect（采集）双职责工作流
+
+- **SECURITY.md** — 安全策略与漏洞报告流程
+- **GitHub 模板** — Issue 模板（Bug Report / Feature Request）和 PR 模板
 
 - **CLI 命令：`synapse install`**（`cmd/synapse/main.go`）
   - 支持三个目标平台：`codebuddy`、`claude`/`claude-code`、`cursor`
