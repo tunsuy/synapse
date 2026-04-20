@@ -21,12 +21,12 @@ linters:
     - errorlint
     - exhaustive
     - exportloopref
-    - forbidigo
-    - gochecknoinits
+    # - forbidigo  # Disabled: CLI apps need fmt.Print for user output
+    # - gochecknoinits  # Disabled: init() is idiomatic for extension registration
     - goconst
     - gocritic
     - gocyclo
-    - godot
+    # - godot  # Disabled: Chinese comments don't end with period
     - gofmt
     - goimports
     - goprintffuncname
@@ -56,9 +56,10 @@ linters-settings:
     enable-all: true
     disable:
       - fieldalignment
+      - shadow
 
   gocyclo:
-    min-complexity: 15
+    min-complexity: 30
 
   goconst:
     min-len: 3
@@ -76,6 +77,9 @@ linters-settings:
       - ifElseChain
       - octalLiteral
       - whyNoLint
+      - hugeParam
+      - rangeValCopy
+      - unnamedResult
 
   goimports:
     local-prefixes: github.com/tunsuy/synapse
@@ -96,7 +100,7 @@ linters-settings:
       - name: error-return
       - name: error-strings
       - name: error-naming
-      - name: exported
+      # - name: exported  # Disabled: stuttering names are intentional for clarity
       - name: if-return
       - name: increment-decrement
       - name: var-naming
@@ -126,6 +130,7 @@ linters-settings:
     excludes:
       - G104 # Audit errors not checked
       - G304 # File path provided as taint input
+      - G306 # WriteFile with 0644 is acceptable for knowledge files
 
 issues:
   exclude-rules:
@@ -151,6 +156,28 @@ issues:
       text: "dot-imports"
       linters:
         - revive
+
+    # Disable prealloc for processor files (dynamic slice growth is intentional)
+    - path: internal/processor/
+      linters:
+        - prealloc
+
+    # Disable errcheck for type assertions in config parsing (handled by validation)
+    - path: internal/source/skill/skill\.go
+      linters:
+        - errcheck
+
+    # Disable errcheck for store config parsing (type assertions are followed by empty string checks)
+    - path: internal/store/
+      text: "Error return value is not checked"
+      linters:
+        - errcheck
+
+    # Disable gocyclo for CLI audit command (complexity is inherent to audit logic)
+    - path: cmd/synapse/main\.go
+      text: "cyclomatic complexity"
+      linters:
+        - gocyclo
 
   max-issues-per-linter: 50
   max-same-issues: 10

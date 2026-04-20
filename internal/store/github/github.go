@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -110,7 +111,7 @@ func (s *GitHubStore) Init(ctx context.Context, opts extension.InitOptions) erro
 	files := []fileEntry{
 		{
 			path:    "profile/me.md",
-			content: fmt.Sprintf("---\ntype: profile\ntitle: \"%s\"\ncreated: %s\nupdated: %s\ntags:\n  - profile\n---\n\n# 👤 %s\n\n## 简介\n\n<!-- 在这里描述自己 -->\n\n## 技术栈\n\n<!-- 列出你的主要技术栈 -->\n\n## 兴趣领域\n\n<!-- 列出你感兴趣的领域 -->\n\n## 当前关注\n\n<!-- 列出你最近在关注/学习的内容 -->\n", name, now, now, name),
+			content: fmt.Sprintf("---\ntype: profile\ntitle: %q\ncreated: %s\nupdated: %s\ntags:\n  - profile\n---\n\n# 👤 %s\n\n## 简介\n\n<!-- 在这里描述自己 -->\n\n## 技术栈\n\n<!-- 列出你的主要技术栈 -->\n\n## 兴趣领域\n\n<!-- 列出你感兴趣的领域 -->\n\n## 当前关注\n\n<!-- 列出你最近在关注/学习的内容 -->\n", name, now, now, name),
 		},
 		{path: "topics/.gitkeep", content: ""},
 		{path: "entities/.gitkeep", content: ""},
@@ -197,10 +198,7 @@ func (s *GitHubStore) Read(ctx context.Context, path string) (model.KnowledgeFil
 		return model.KnowledgeFile{}, fmt.Errorf("decode content for %s: %w", path, err)
 	}
 
-	kf, err := parseKnowledgeFile(path, data)
-	if err != nil {
-		return model.KnowledgeFile{}, fmt.Errorf("parse %s: %w", path, err)
-	}
+	kf := parseKnowledgeFile(path, data)
 
 	return kf, nil
 }
@@ -214,8 +212,8 @@ func (s *GitHubStore) Write(ctx context.Context, file model.KnowledgeFile) error
 		return fmt.Errorf("marshal %s: %w", file.Path, err)
 	}
 
-	// 尝试获取现有文件的 SHA（用于更新场景）
-	sha, _ := s.getFileSHA(ctx, fullPath)
+	// 尝试获取现有文件的 SHA（用于更新场景，新文件没有 SHA 是正常的）
+	sha, _ := s.getFileSHA(ctx, fullPath) //nolint:errcheck // SHA is optional for new files
 
 	url := fmt.Sprintf("%s/repos/%s/%s/contents/%s",
 		s.apiBase, s.owner, s.repo, fullPath)
@@ -552,7 +550,7 @@ func (s *GitHubStore) doRequest(ctx context.Context, method, url string, body []
 
 // parseKnowledgeFile 解析 Markdown 文件为 KnowledgeFile
 // 复用 local store 的解析逻辑
-func parseKnowledgeFile(path string, data []byte) (model.KnowledgeFile, error) {
+func parseKnowledgeFile(path string, data []byte) model.KnowledgeFile {
 	content := string(data)
 
 	kf := model.KnowledgeFile{
@@ -590,7 +588,7 @@ func parseKnowledgeFile(path string, data []byte) (model.KnowledgeFile, error) {
 		kf.Frontmatter.Updated = now
 	}
 
-	return kf, nil
+	return kf
 }
 
 // parseFrontmatterSimple 简单回退解析（当 YAML 解析失败时使用）
@@ -611,7 +609,8 @@ func parseFrontmatterSimple(fm string, frontmatter *model.Frontmatter) {
 
 // isNotFoundErr 判断错误是否为 404
 func isNotFoundErr(err error) bool {
-	if e, ok := err.(*apiError); ok {
+	var e *apiError
+	if errors.As(err, &e) {
 		return e.StatusCode == http.StatusNotFound
 	}
 	return false

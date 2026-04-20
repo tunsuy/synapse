@@ -500,10 +500,7 @@ Entity content`,
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			kf, err := parseKnowledgeFile(tc.path, []byte(tc.data))
-			if err != nil {
-				t.Fatalf("parseKnowledgeFile() error: %v", err)
-			}
+			kf := parseKnowledgeFile(tc.path, []byte(tc.data))
 			if kf.Frontmatter.Title != tc.wantTitle {
 				t.Errorf("Title = %q, want %q", kf.Frontmatter.Title, tc.wantTitle)
 			}

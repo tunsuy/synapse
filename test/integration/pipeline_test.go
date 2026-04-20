@@ -32,8 +32,8 @@ func TestFullPipeline_TopicCollection(t *testing.T) {
 	opts := engine.CollectOptions{
 		FetchOpts: model.FetchOptions{
 			Config: map[string]any{
-				"content": "Go's concurrency model is based on goroutines and channels, inspired by CSP.",
-				"title":   "Go Concurrency",
+				"content":          "Go's concurrency model is based on goroutines and channels, inspired by CSP.",
+				"title":            "Go Concurrency",
 				"suggested_topics": "Go Concurrency",
 				"key_points":       "goroutines are lightweight threads,channels enable communication",
 			},
@@ -83,10 +83,10 @@ func TestFullPipeline_EntityCollection(t *testing.T) {
 	opts := engine.CollectOptions{
 		FetchOpts: model.FetchOptions{
 			Config: map[string]any{
-				"content":              "Docker is a containerization platform that simplifies deployment.",
-				"title":               "Docker Overview",
-				"suggested_entities":   "Docker",
-				"suggested_concepts":   "Containerization",
+				"content":            "Docker is a containerization platform that simplifies deployment.",
+				"title":              "Docker Overview",
+				"suggested_entities": "Docker",
+				"suggested_concepts": "Containerization",
 			},
 		},
 	}

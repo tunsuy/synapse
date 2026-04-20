@@ -777,7 +777,7 @@ func auditAction(c *cli.Context) error {
 					continue
 				}
 				for _, link := range other.Frontmatter.Links {
-					if strings.ToLower(link) == titleLower {
+					if strings.EqualFold(link, titleLower) {
 						isLinked = true
 						break
 					}
@@ -806,7 +806,7 @@ func auditAction(c *cli.Context) error {
 		case "warning":
 			score -= 5
 		case "info":
-			score -= 1
+			score--
 		}
 	}
 	if score < 0 {
@@ -886,14 +886,14 @@ func installAction(c *cli.Context) error {
 	if c.Bool("list") {
 		adapters, err := listAdapters()
 		if err != nil {
-			// 如果 adapter 配置不可用，显示默认列表
+			// 如果 adapter 配置不可用，显示默认列表（这是预期行为，不是错误）
 			fmt.Println("📋 Supported AI assistants:")
 			fmt.Println()
 			fmt.Println("  codebuddy  — CodeBuddy")
 			fmt.Println("  claude     — Claude Code")
 			fmt.Println("  cursor     — Cursor")
 			fmt.Println("\n使用方法：synapse install <assistant>")
-			return nil
+			return nil //nolint:nilerr // intentionally return nil as fallback list is shown
 		}
 
 		fmt.Println("📋 Supported AI assistants:")

@@ -163,12 +163,12 @@ func TestSkillSource_Fetch_WithSuggestions(t *testing.T) {
 
 	result, err := src.Fetch(ctx, model.FetchOptions{
 		Config: map[string]any{
-			"content":             "Go concurrency with goroutines and channels.",
-			"suggested_topics":    "golang, concurrency",
-			"suggested_entities":  "Go, goroutine",
-			"suggested_concepts":  "CSP, actor-model",
-			"key_points":          "goroutines are lightweight, channels for communication",
-			"session_id":          "sess-123",
+			"content":            "Go concurrency with goroutines and channels.",
+			"suggested_topics":   "golang, concurrency",
+			"suggested_entities": "Go, goroutine",
+			"suggested_concepts": "CSP, actor-model",
+			"key_points":         "goroutines are lightweight, channels for communication",
+			"session_id":         "sess-123",
 		},
 	})
 	if err != nil {

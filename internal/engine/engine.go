@@ -22,9 +22,9 @@ type Engine struct {
 	sources   []extension.Source
 	processor extension.Processor
 	store     extension.Store
-	indexer   extension.Indexer   // 可选
+	indexer   extension.Indexer    // 可选
 	consumers []extension.Consumer // 可选
-	auditor   extension.Auditor   // 可选
+	auditor   extension.Auditor    // 可选
 }
 
 // New 从配置文件创建引擎实例

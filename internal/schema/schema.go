@@ -128,8 +128,8 @@ func Default() *Schema {
 			Required: []string{"type", "title", "created", "updated"},
 			Optional: []string{"tags", "links", "source", "confidence", "aliases", "category", "status"},
 		},
-		LinkFormat:  "[[page-id]]",
-		Operations:  []string{"capture", "compile", "retrieve", "audit"},
+		LinkFormat: "[[page-id]]",
+		Operations: []string{"capture", "compile", "retrieve", "audit"},
 		Quality: QualitySpec{
 			MinConfidence: 0.5,
 			MaxStaleDays:  90,

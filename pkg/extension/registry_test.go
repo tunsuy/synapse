@@ -40,8 +40,8 @@ func (m *mockStore) Initialized(_ context.Context) (bool, error) { return false,
 func (m *mockStore) Read(_ context.Context, _ string) (model.KnowledgeFile, error) {
 	return model.KnowledgeFile{}, nil
 }
-func (m *mockStore) Write(_ context.Context, _ model.KnowledgeFile) error   { return nil }
-func (m *mockStore) Delete(_ context.Context, _ string) error                { return nil }
+func (m *mockStore) Write(_ context.Context, _ model.KnowledgeFile) error { return nil }
+func (m *mockStore) Delete(_ context.Context, _ string) error             { return nil }
 func (m *mockStore) List(_ context.Context, _ string, _ model.ListOptions) ([]model.FileInfo, error) {
 	return nil, nil
 }
@@ -52,9 +52,9 @@ type mockIndexer struct {
 	name string
 }
 
-func (m *mockIndexer) Name() string                                       { return m.name }
+func (m *mockIndexer) Name() string                                         { return m.name }
 func (m *mockIndexer) Index(_ context.Context, _ model.KnowledgeFile) error { return nil }
-func (m *mockIndexer) Build(_ context.Context, _ Store) error              { return nil }
+func (m *mockIndexer) Build(_ context.Context, _ Store) error               { return nil }
 func (m *mockIndexer) Search(_ context.Context, _ string, _ model.SearchOptions) ([]model.SearchResult, error) {
 	return nil, nil
 }

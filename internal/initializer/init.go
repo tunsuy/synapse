@@ -132,7 +132,9 @@ func writeSchema(basePath string) error {
 	}
 
 	header := []byte("# Synapse Knowledge Schema — 知识库行为契约\n# 所有扩展点共同遵守此规范，修改 Schema 即修改所有 AI 助手的行为\n#\n# 文档: https://github.com/tunsuy/synapse/blob/main/docs/roadmap.md\n\n")
-	content := append(header, data...)
+	content := make([]byte, 0, len(header)+len(data))
+	content = append(content, header...)
+	content = append(content, data...)
 
 	path := filepath.Join(basePath, ".synapse", "schema.yaml")
 	if err := os.WriteFile(path, content, 0o644); err != nil {
@@ -151,7 +153,9 @@ func writeConfig(basePath string) error {
 	}
 
 	header := []byte("# Synapse Configuration — 扩展点注册中心\n# 声明各扩展点使用哪个实现\n#\n# 文档: https://github.com/tunsuy/synapse/blob/main/docs/roadmap.md\n\n")
-	content := append(header, data...)
+	content := make([]byte, 0, len(header)+len(data))
+	content = append(content, header...)
+	content = append(content, data...)
 
 	path := filepath.Join(basePath, ".synapse", "config.yaml")
 	if err := os.WriteFile(path, content, 0o644); err != nil {

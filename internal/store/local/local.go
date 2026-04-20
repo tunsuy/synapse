@@ -70,7 +70,9 @@ func (s *LocalStore) Init(ctx context.Context, opts extension.InitOptions) error
 	if len(opts.SchemaData) > 0 {
 		schemaPath := filepath.Join(s.basePath, ".synapse", "schema.yaml")
 		header := []byte("# Synapse Knowledge Schema — 知识库行为契约\n# 所有扩展点共同遵守此规范，修改 Schema 即修改所有 AI 助手的行为\n#\n# 文档: https://github.com/tunsuy/synapse/blob/main/docs/roadmap.md\n\n")
-		content := append(header, opts.SchemaData...)
+		content := make([]byte, 0, len(header)+len(opts.SchemaData))
+		content = append(content, header...)
+		content = append(content, opts.SchemaData...)
 		if err := os.WriteFile(schemaPath, content, 0o644); err != nil {
 			return fmt.Errorf("write schema.yaml: %w", err)
 		}
@@ -173,11 +175,7 @@ tags:
   }
 }
 `
-	if err := os.WriteFile(filepath.Join(s.basePath, "graph", "relations.json"), []byte(relationsContent), 0o644); err != nil {
-		return err
-	}
-
-	return nil
+	return os.WriteFile(filepath.Join(s.basePath, "graph", "relations.json"), []byte(relationsContent), 0o644)
 }
 
 // writeGitignore 写入 .gitignore
@@ -215,10 +213,7 @@ func (s *LocalStore) Read(ctx context.Context, path string) (model.KnowledgeFile
 		return model.KnowledgeFile{}, fmt.Errorf("read %s: %w", path, err)
 	}
 
-	kf, err := parseKnowledgeFile(path, data)
-	if err != nil {
-		return model.KnowledgeFile{}, fmt.Errorf("parse %s: %w", path, err)
-	}
+	kf := parseKnowledgeFile(path, data)
 
 	return kf, nil
 }
@@ -317,7 +312,7 @@ func (s *LocalStore) Exists(ctx context.Context, path string) (bool, error) {
 
 // parseKnowledgeFile 解析 Markdown 文件为 KnowledgeFile
 // 使用 YAML 库完整解析 Frontmatter + Markdown Body
-func parseKnowledgeFile(path string, data []byte) (model.KnowledgeFile, error) {
+func parseKnowledgeFile(path string, data []byte) model.KnowledgeFile {
 	content := string(data)
 
 	kf := model.KnowledgeFile{
@@ -355,7 +350,7 @@ func parseKnowledgeFile(path string, data []byte) (model.KnowledgeFile, error) {
 		kf.Frontmatter.Updated = now
 	}
 
-	return kf, nil
+	return kf
 }
 
 // parseFrontmatterSimple 简单回退解析（当 YAML 解析失败时使用）

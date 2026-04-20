@@ -740,9 +740,9 @@ func TestParseKnowledgeFile(t *testing.T) {
 		wantBody  string
 	}{
 		{
-			name: "with frontmatter",
-			path: "topics/golang.md",
-			data: "---\ntype: topic\ntitle: \"Go Programming\"\ncreated: 2025-04-18T12:00:00Z\nupdated: 2025-04-18T12:00:00Z\n---\n\n# Go Programming",
+			name:      "with frontmatter",
+			path:      "topics/golang.md",
+			data:      "---\ntype: topic\ntitle: \"Go Programming\"\ncreated: 2025-04-18T12:00:00Z\nupdated: 2025-04-18T12:00:00Z\n---\n\n# Go Programming",
 			wantTitle: "Go Programming",
 			wantType:  model.PageTypeTopic,
 			wantBody:  "# Go Programming",
@@ -756,9 +756,9 @@ func TestParseKnowledgeFile(t *testing.T) {
 			wantBody:  "# Just some content",
 		},
 		{
-			name: "with unquoted title",
-			path: "topics/unquoted.md",
-			data: "---\ntype: entity\ntitle: CodeBuddy\n---\n\nEntity content",
+			name:      "with unquoted title",
+			path:      "topics/unquoted.md",
+			data:      "---\ntype: entity\ntitle: CodeBuddy\n---\n\nEntity content",
 			wantTitle: "CodeBuddy",
 			wantType:  model.PageTypeEntity,
 			wantBody:  "Entity content",
@@ -768,10 +768,7 @@ func TestParseKnowledgeFile(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			kf, err := parseKnowledgeFile(tc.path, []byte(tc.data))
-			if err != nil {
-				t.Fatalf("parseKnowledgeFile() error: %v", err)
-			}
+			kf := parseKnowledgeFile(tc.path, []byte(tc.data))
 			if kf.Frontmatter.Title != tc.wantTitle {
 				t.Errorf("Title = %q, want %q", kf.Frontmatter.Title, tc.wantTitle)
 			}

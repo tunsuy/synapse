@@ -104,7 +104,7 @@ func (p *SkillProcessor) buildTopicFile(rc model.RawContent, topic string, now t
 	// 收集与此主题相关的链接
 	links := collectLinks(rc, topic)
 
-	body := buildBody(rc, topic, "topic")
+	body := buildBody(rc, topic)
 
 	return model.KnowledgeFile{
 		Path: path,
@@ -130,7 +130,7 @@ func (p *SkillProcessor) buildEntityFile(rc model.RawContent, entity string, now
 
 	links := collectLinks(rc, entity)
 
-	body := buildBody(rc, entity, "entity")
+	body := buildBody(rc, entity)
 
 	return model.KnowledgeFile{
 		Path: path,
@@ -157,7 +157,7 @@ func (p *SkillProcessor) buildConceptFile(rc model.RawContent, concept string, n
 
 	links := collectLinks(rc, concept)
 
-	body := buildBody(rc, concept, "concept")
+	body := buildBody(rc, concept)
 
 	return model.KnowledgeFile{
 		Path: path,
@@ -272,21 +272,20 @@ func buildTags(rc model.RawContent, primaryTag string) []string {
 // collectLinks 收集相关的双向链接目标
 func collectLinks(rc model.RawContent, exclude string) []string {
 	linkSet := make(map[string]bool)
-	excludeLower := strings.ToLower(exclude)
 
 	// 将其他建议的主题/实体/概念都作为链接目标
 	for _, t := range rc.SuggestedTopics {
-		if strings.ToLower(t) != excludeLower {
+		if !strings.EqualFold(t, exclude) {
 			linkSet[t] = true
 		}
 	}
 	for _, e := range rc.SuggestedEntities {
-		if strings.ToLower(e) != excludeLower {
+		if !strings.EqualFold(e, exclude) {
 			linkSet[e] = true
 		}
 	}
 	for _, c := range rc.SuggestedConcepts {
-		if strings.ToLower(c) != excludeLower {
+		if !strings.EqualFold(c, exclude) {
 			linkSet[c] = true
 		}
 	}
@@ -299,7 +298,7 @@ func collectLinks(rc model.RawContent, exclude string) []string {
 }
 
 // buildBody 构建知识文件的 Markdown 正文
-func buildBody(rc model.RawContent, title, pageType string) string {
+func buildBody(rc model.RawContent, title string) string {
 	var body strings.Builder
 
 	body.WriteString(fmt.Sprintf("# %s\n\n", title))
