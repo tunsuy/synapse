@@ -9,7 +9,7 @@
   AI 어시스턴트와의 대화에서 자동으로 지식을 축적, 정리, 환원하여 모든 AI 대화를 지식 복리로 만듭니다.
 </p>
 
-[![Go Version](https://img.shields.io/badge/Go-%3E%3D1.21-blue.svg)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-%3E%3D1.24-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -80,7 +80,7 @@ Synapse는 **확장 포인트 모델(Extension Point Model)** 을 채택 — Sto
 
 ### 환경 요구사항
 
-- Go >= 1.21
+- Go >= 1.24
 
 ### 설치
 

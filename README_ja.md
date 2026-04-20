@@ -9,7 +9,7 @@
   AIアシスタントとの会話から自動的にナレッジを蓄積・整理・活用し、すべてのAI会話をナレッジの複利に変えます。
 </p>
 
-[![Go Version](https://img.shields.io/badge/Go-%3E%3D1.21-blue.svg)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-%3E%3D1.24-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -80,7 +80,7 @@ Synapse は **拡張ポイントモデル（Extension Point Model）** を採用
 
 ### 環境要件
 
-- Go >= 1.21
+- Go >= 1.24
 
 ### インストール
 

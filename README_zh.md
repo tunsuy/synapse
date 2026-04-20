@@ -9,7 +9,7 @@
   从各种 AI 助手对话中自动沉淀、整理、反哺知识，让你的每一次 AI 对话都成为知识复利。
 </p>
 
-[![Go Version](https://img.shields.io/badge/Go-%3E%3D1.21-blue.svg)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-%3E%3D1.24-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -80,7 +80,7 @@ Synapse 采用 **扩展点模型（Extension Point Model）**，以 Store 为底
 
 ### 环境要求
 
-- Go >= 1.21
+- Go >= 1.24
 
 ### 安装
 

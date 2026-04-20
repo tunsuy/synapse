@@ -9,7 +9,7 @@
   Destila, organiza y reinvierte automáticamente el conocimiento de tus conversaciones con IA, convirtiendo cada interacción en capital de conocimiento compuesto.
 </p>
 
-[![Go Version](https://img.shields.io/badge/Go-%3E%3D1.21-blue.svg)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-%3E%3D1.24-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -80,7 +80,7 @@ Synapse adopta un **Modelo de Puntos de Extensión (Extension Point Model)** —
 
 ### Requisitos
 
-- Go >= 1.21
+- Go >= 1.24
 
 ### Instalación
 
