@@ -131,7 +131,6 @@ func (s *GitHubStore) Init(ctx context.Context, opts extension.InitOptions) erro
 
 	// 逐个写入文件
 	for _, f := range files {
-		kf := model.KnowledgeFile{Path: f.path, Body: f.content}
 		data := []byte(f.content)
 
 		fullPath := s.fullPath(f.path)
@@ -144,7 +143,12 @@ func (s *GitHubStore) Init(ctx context.Context, opts extension.InitOptions) erro
 			Branch:  s.branch,
 		}
 
-		_ = kf // suppress unused
+		// force 模式下文件可能已存在，需要先获取 SHA 才能更新
+		if opts.Force {
+			if sha, err := s.getFileSHA(ctx, fullPath); err == nil && sha != "" {
+				reqBody.SHA = sha
+			}
+		}
 
 		payload, err := json.Marshal(reqBody)
 		if err != nil {
