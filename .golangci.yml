@@ -20,7 +20,7 @@ linters:
     - errname
     - errorlint
     - exhaustive
-    - exportloopref
+    - copyloopvar
     # - forbidigo  # Disabled: CLI apps need fmt.Print for user output
     # - gochecknoinits  # Disabled: init() is idiomatic for extension registration
     - goconst
