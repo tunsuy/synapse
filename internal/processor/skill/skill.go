@@ -238,6 +238,7 @@ func toSlug(title string) string {
 		"!", "",
 		"&", "and",
 		"#", "",
+		"+", "",
 	)
 	s = replacer.Replace(s)
 

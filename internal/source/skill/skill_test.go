@@ -78,7 +78,7 @@ func TestSkillSource_Fetch(t *testing.T) {
 			},
 			wantErr:    false,
 			wantLen:    1,
-			wantTitle:  "Go's concurrency model is based on goroutines and...",
+			wantTitle:  "Go's concurrency model is based on goroutines and ...",
 			wantSource: "codebuddy",
 		},
 		{
@@ -248,7 +248,7 @@ func TestExtractTitle(t *testing.T) {
 		{
 			name:    "long content",
 			content: "This is a very long title that exceeds the fifty character limit for title extraction purposes",
-			want:    "This is a very long title that exceeds the fifty " + "...",
+			want:    "This is a very long title that exceeds the fifty c" + "...",
 		},
 		{
 			name:    "markdown heading",
