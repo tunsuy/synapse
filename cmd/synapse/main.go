@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -8,8 +9,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/urfave/cli/v2"
+	"gopkg.in/yaml.v3"
 
 	"github.com/tunsuy/synapse/internal/config"
 	"github.com/tunsuy/synapse/internal/engine"
@@ -845,19 +848,18 @@ func installCommand() *cli.Command {
 		Description: `将 Synapse Skill 文件安装到目标 AI 助手的用户级配置目录，
 让 AI 助手在对话中自动帮你采集、整理、反哺知识。
 
+每个 AI 助手在 skills/<name>/adapter.yaml 中定义差异配置，
+新增助手只需添加目录 + adapter.yaml，不改任何 Go 代码。
+
 默认安装到用户主目录下（全局生效），所有项目共享。
 使用 --target 可指定安装到特定项目目录（仅该项目生效）。
-
-支持的 AI 助手：
-  - codebuddy : CodeBuddy（安装到 ~/.codebuddy/skills/）
-  - claude    : Claude Code（安装到 ~/.claude/SYNAPSE.md）
-  - cursor    : Cursor（安装到 ~/.cursorrules）
 
 示例：
   synapse install codebuddy              # 安装到用户主目录（全局）
   synapse install claude                 # 安装到用户主目录（全局）
+  synapse install cursor                 # 安装到用户主目录（全局）
   synapse install codebuddy --target .   # 安装到当前项目目录
-  synapse install --list`,
+  synapse install --list                 # 查看所有支持的 AI 助手`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "target",
@@ -877,11 +879,23 @@ func installCommand() *cli.Command {
 // installAction 执行 install 命令
 func installAction(c *cli.Context) error {
 	if c.Bool("list") {
+		adapters, err := listAdapters()
+		if err != nil {
+			// 如果 adapter 配置不可用，显示默认列表
+			fmt.Println("📋 Supported AI assistants:")
+			fmt.Println()
+			fmt.Println("  codebuddy  — CodeBuddy")
+			fmt.Println("  claude     — Claude Code")
+			fmt.Println("  cursor     — Cursor")
+			fmt.Println("\n使用方法：synapse install <assistant>")
+			return nil
+		}
+
 		fmt.Println("📋 Supported AI assistants:")
 		fmt.Println()
-		fmt.Println("  codebuddy  — CodeBuddy（安装到 ~/.codebuddy/skills/synapse-knowledge.md）")
-		fmt.Println("  claude     — Claude Code（安装到 ~/.claude/SYNAPSE.md）")
-		fmt.Println("  cursor     — Cursor（安装到 ~/.cursorrules）")
+		for name, adapter := range adapters {
+			fmt.Printf("  %-12s— 安装到 ~/%s\n", name, adapter.DestPath)
+		}
 		fmt.Println("\n使用方法：synapse install <assistant>")
 		fmt.Println("         synapse install <assistant> --target .  # 安装到当前项目目录")
 		return nil
@@ -902,118 +916,276 @@ func installAction(c *cli.Context) error {
 		targetDir = home
 	}
 
-	switch strings.ToLower(assistant) {
-	case "codebuddy":
-		return installCodeBuddySkill(targetDir)
-	case "claude", "claude-code":
-		return installClaudeSkill(targetDir)
-	case "cursor":
-		return installCursorSkill(targetDir)
-	default:
-		return fmt.Errorf("不支持的 AI 助手: %q；运行 synapse install --list 查看支持列表", assistant)
-	}
+	// 标准化助手名称：支持别名
+	adapterKey := normalizeAssistantName(strings.ToLower(assistant))
+
+	return installSkill(adapterKey, targetDir)
 }
 
-// installCodeBuddySkill 安装 Skill 到 CodeBuddy
-func installCodeBuddySkill(targetDir string) error {
-	skillDir := filepath.Join(targetDir, ".codebuddy", "skills")
-	if err := os.MkdirAll(skillDir, 0755); err != nil {
-		return fmt.Errorf("create skill dir: %w", err)
+// normalizeAssistantName 将用户输入的助手名称映射到 adapter key
+// 支持别名，如 "claude-code" → "claude"
+func normalizeAssistantName(name string) string {
+	aliases := map[string]string{
+		"claude-code": "claude",
 	}
+	if mapped, ok := aliases[name]; ok {
+		return mapped
+	}
+	return name
+}
 
-	destPath := filepath.Join(skillDir, "synapse-knowledge.md")
+// --- Skill 安装核心逻辑 ---
 
-	// 尝试从项目的 skills/codebuddy/ 目录读取
-	content, err := findSkillTemplate("codebuddy", "synapse-knowledge.md")
+// skillAdapter 定义单个 AI 助手的差异化配置
+// 每个助手在 skills/<name>/adapter.yaml 中定义自己的配置
+type skillAdapter struct {
+	Source      string   `yaml:"source"`
+	DestPath    string   `yaml:"dest_path"`
+	LegacyPaths []string `yaml:"legacy_paths"`
+	Frontmatter string   `yaml:"frontmatter"`
+	Tips        []string `yaml:"tips"`
+}
+
+// skillTemplateData 是传入 Go text/template 渲染的数据
+type skillTemplateData struct {
+	Frontmatter string
+	Source      string
+}
+
+// installSkill 通用安装函数：读取通用模板 + adapter 配置 → 渲染 → 写入目标路径
+func installSkill(assistantKey, targetDir string) error {
+	// 1. 加载 adapter 配置
+	adapter, err := loadAdapter(assistantKey)
 	if err != nil {
-		return fmt.Errorf("find skill template: %w", err)
+		return fmt.Errorf("load adapter config for %q: %w", assistantKey, err)
 	}
 
-	if err := os.WriteFile(destPath, content, 0644); err != nil {
-		return fmt.Errorf("write skill file: %w", err)
-	}
-
-	fmt.Printf("✅ CodeBuddy Skill 已安装到: %s\n", destPath)
-	fmt.Println("\n📖 使用方法：")
-	fmt.Println("   CodeBuddy 会自动加载 .codebuddy/skills/ 目录下的 Skill。")
-	fmt.Println("   在对话中，AI 会自动帮你采集和整理知识。")
-	fmt.Println("\n💡 提示：")
-	fmt.Println("   - 说 \"记一下\" 或 \"保存到知识库\" 触发知识采集")
-	fmt.Println("   - 说 \"检查知识库\" 执行审计")
-	fmt.Println("   - 说 \"我知道什么关于 X\" 检索已有知识")
-	return nil
-}
-
-// installClaudeSkill 安装 Skill 到 Claude Code
-func installClaudeSkill(targetDir string) error {
-	claudeDir := filepath.Join(targetDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
-		return fmt.Errorf("create claude dir: %w", err)
-	}
-
-	destPath := filepath.Join(claudeDir, "SYNAPSE.md")
-
-	content, err := findSkillTemplate("claude-code", "SYNAPSE.md")
+	// 2. 加载通用模板
+	tmplContent, err := findCommonTemplate("SKILL.md.tmpl")
 	if err != nil {
-		return fmt.Errorf("find skill template: %w", err)
+		return fmt.Errorf("find common template: %w", err)
 	}
 
-	if err := os.WriteFile(destPath, content, 0644); err != nil {
-		return fmt.Errorf("write skill file: %w", err)
+	// 3. 渲染模板
+	rendered, err := renderTemplate(tmplContent, skillTemplateData{
+		Frontmatter: strings.TrimSpace(adapter.Frontmatter),
+		Source:      adapter.Source,
+	})
+	if err != nil {
+		return fmt.Errorf("render template for %q: %w", assistantKey, err)
 	}
 
-	fmt.Printf("✅ Claude Code Skill 已安装到: %s\n", destPath)
-	fmt.Println("\n📖 使用方法：")
-	fmt.Println("   将以下内容添加到你的 CLAUDE.md 文件中：")
-	fmt.Println()
-	fmt.Println("   请阅读并遵循 SYNAPSE.md 中的知识管理规范。")
-	fmt.Println()
-	fmt.Println("   或直接使用 /synapse 命令（如果你配置了自定义命令）。")
-	return nil
-}
-
-// installCursorSkill 安装 Skill 到 Cursor
-func installCursorSkill(targetDir string) error {
-	destPath := filepath.Join(targetDir, ".cursor", "rules", "synapse-knowledge.mdc")
-
+	// 4. 写入目标文件
+	destPath := filepath.Join(targetDir, adapter.DestPath)
 	destDir := filepath.Dir(destPath)
 	if err := os.MkdirAll(destDir, 0755); err != nil {
-		return fmt.Errorf("create cursor rules dir: %w", err)
+		return fmt.Errorf("create dir %s: %w", destDir, err)
 	}
 
-	content, findErr := findSkillTemplate("cursor", ".cursorrules")
-	if findErr != nil {
-		return fmt.Errorf("find skill template: %w", findErr)
-	}
-
-	if err := os.WriteFile(destPath, content, 0644); err != nil {
+	if err := os.WriteFile(destPath, rendered, 0644); err != nil {
 		return fmt.Errorf("write skill file: %w", err)
 	}
 
-	fmt.Printf("✅ Cursor Skill 已安装到: %s\n", destPath)
-	fmt.Println("\n📖 使用方法：")
-	fmt.Println("   Cursor 会自动加载 .cursor/rules/ 目录下的规则文件。")
-	fmt.Println("   在 Cursor 对话中，AI 会帮你管理知识。")
+	// 5. 清理旧版本文件
+	for _, legacy := range adapter.LegacyPaths {
+		oldPath := filepath.Join(targetDir, legacy)
+		if _, statErr := os.Stat(oldPath); statErr == nil {
+			_ = os.Remove(oldPath)
+			fmt.Printf("🧹 已清理旧版 Skill 文件: %s\n", oldPath)
+		}
+	}
+
+	// 6. 输出安装提示
+	fmt.Printf("✅ Skill 已安装到: %s\n", destPath)
+	if len(adapter.Tips) > 0 {
+		fmt.Println("\n📖 使用方法：")
+		for i, tip := range adapter.Tips {
+			if i < 2 {
+				fmt.Printf("   %s\n", tip)
+			}
+		}
+		if len(adapter.Tips) > 2 {
+			fmt.Println("\n💡 提示：")
+			for _, tip := range adapter.Tips[2:] {
+				fmt.Printf("   - %s\n", tip)
+			}
+		}
+	}
+
 	return nil
 }
 
-// findSkillTemplate 查找 Skill 模板文件
-// 优先从可执行文件所在目录的 skills/ 目录查找，然后尝试当前工作目录
-func findSkillTemplate(assistant, filename string) ([]byte, error) {
-	// 搜索路径列表
-	searchPaths := []string{}
+// loadAdapter 加载指定助手的 adapter 配置
+// 从 skills/<assistantKey>/adapter.yaml 读取
+func loadAdapter(assistantKey string) (skillAdapter, error) {
+	data, err := findSkillFile(assistantKey, "adapter.yaml")
+	if err != nil {
+		// adapter.yaml 找不到时，列出可用的助手
+		available, listErr := listAdapterNames()
+		if listErr != nil {
+			return skillAdapter{}, fmt.Errorf("adapter %q not found: %w", assistantKey, err)
+		}
+		return skillAdapter{}, fmt.Errorf("adapter %q not found; available: %v", assistantKey, available)
+	}
+
+	var adapter skillAdapter
+	if err := yaml.Unmarshal(data, &adapter); err != nil {
+		return skillAdapter{}, fmt.Errorf("parse adapter.yaml for %q: %w", assistantKey, err)
+	}
+
+	return adapter, nil
+}
+
+// renderTemplate 使用 Go text/template 渲染模板内容
+func renderTemplate(tmplContent []byte, data skillTemplateData) ([]byte, error) {
+	tmpl, err := template.New("skill").Parse(string(tmplContent))
+	if err != nil {
+		return nil, fmt.Errorf("parse template: %w", err)
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, data); err != nil {
+		return nil, fmt.Errorf("execute template: %w", err)
+	}
+
+	return buf.Bytes(), nil
+}
+
+// findCommonTemplate 查找通用模板文件（从 skills/common/ 目录）
+// 搜索顺序：可执行文件目录 → 当前工作目录 → 用户主目录
+func findCommonTemplate(filename string) ([]byte, error) {
+	var searchPaths []string
+
+	// 1. 可执行文件所在目录的 skills/common/
+	if exe, err := os.Executable(); err == nil {
+		searchPaths = append(searchPaths, filepath.Join(filepath.Dir(exe), "skills", "common", filename))
+	}
+
+	// 2. 当前工作目录的 skills/common/
+	if cwd, err := os.Getwd(); err == nil {
+		searchPaths = append(searchPaths, filepath.Join(cwd, "skills", "common", filename))
+	}
+
+	// 3. 用户主目录的 .synapse/skills/common/
+	if home, err := os.UserHomeDir(); err == nil {
+		searchPaths = append(searchPaths, filepath.Join(home, ".synapse", "skills", "common", filename))
+	}
+
+	for _, p := range searchPaths {
+		if data, err := os.ReadFile(p); err == nil {
+			return data, nil
+		}
+	}
+
+	return nil, fmt.Errorf("common template %q not found; searched: %v", filename, searchPaths)
+}
+
+// listAdapters 列出所有可用的 adapter（用于 install --list）
+// 自动扫描 skills/ 目录下含有 adapter.yaml 的子目录
+func listAdapters() (map[string]skillAdapter, error) {
+	names, err := listAdapterNames()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]skillAdapter, len(names))
+	for _, name := range names {
+		adapter, err := loadAdapter(name)
+		if err != nil {
+			continue
+		}
+		result[name] = adapter
+	}
+
+	if len(result) == 0 {
+		return nil, fmt.Errorf("no adapters found")
+	}
+
+	return result, nil
+}
+
+// listAdapterNames 扫描 skills/ 目录，返回所有含有 adapter.yaml 的子目录名
+func listAdapterNames() ([]string, error) {
+	skillsDirs := findSkillsDirs()
+	if len(skillsDirs) == 0 {
+		return nil, fmt.Errorf("skills directory not found")
+	}
+
+	seen := make(map[string]bool)
+	var names []string
+
+	for _, skillsDir := range skillsDirs {
+		entries, err := os.ReadDir(skillsDir)
+		if err != nil {
+			continue
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() || entry.Name() == "common" {
+				continue
+			}
+			name := entry.Name()
+			if seen[name] {
+				continue
+			}
+			// 检查该目录下是否有 adapter.yaml
+			adapterPath := filepath.Join(skillsDir, name, "adapter.yaml")
+			if _, err := os.Stat(adapterPath); err == nil {
+				seen[name] = true
+				names = append(names, name)
+			}
+		}
+	}
+
+	return names, nil
+}
+
+// findSkillsDirs 返回所有可能的 skills/ 根目录（搜索顺序一致）
+func findSkillsDirs() []string {
+	var dirs []string
 
 	// 1. 可执行文件所在目录的 skills/
 	if exe, err := os.Executable(); err == nil {
-		searchPaths = append(searchPaths, filepath.Join(filepath.Dir(exe), "skills", assistant, filename))
+		dir := filepath.Join(filepath.Dir(exe), "skills")
+		if fi, err := os.Stat(dir); err == nil && fi.IsDir() {
+			dirs = append(dirs, dir)
+		}
 	}
 
 	// 2. 当前工作目录的 skills/
 	if cwd, err := os.Getwd(); err == nil {
-		searchPaths = append(searchPaths, filepath.Join(cwd, "skills", assistant, filename))
+		dir := filepath.Join(cwd, "skills")
+		if fi, err := os.Stat(dir); err == nil && fi.IsDir() {
+			dirs = append(dirs, dir)
+		}
 	}
 
 	// 3. 用户主目录的 .synapse/skills/
+	if home, err := os.UserHomeDir(); err == nil {
+		dir := filepath.Join(home, ".synapse", "skills")
+		if fi, err := os.Stat(dir); err == nil && fi.IsDir() {
+			dirs = append(dirs, dir)
+		}
+	}
+
+	return dirs
+}
+
+// findSkillFile 查找特定助手的文件（从 skills/<assistant>/ 目录）
+// 搜索顺序：可执行文件目录 → 当前工作目录 → 用户主目录
+func findSkillFile(assistant, filename string) ([]byte, error) {
+	var searchPaths []string
+
+	// 1. 可执行文件所在目录的 skills/<assistant>/
+	if exe, err := os.Executable(); err == nil {
+		searchPaths = append(searchPaths, filepath.Join(filepath.Dir(exe), "skills", assistant, filename))
+	}
+
+	// 2. 当前工作目录的 skills/<assistant>/
+	if cwd, err := os.Getwd(); err == nil {
+		searchPaths = append(searchPaths, filepath.Join(cwd, "skills", assistant, filename))
+	}
+
+	// 3. 用户主目录的 .synapse/skills/<assistant>/
 	if home, err := os.UserHomeDir(); err == nil {
 		searchPaths = append(searchPaths, filepath.Join(home, ".synapse", "skills", assistant, filename))
 	}
@@ -1024,7 +1196,7 @@ func findSkillTemplate(assistant, filename string) ([]byte, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("skill template not found for %s/%s; searched: %v", assistant, filename, searchPaths)
+	return nil, fmt.Errorf("file %s/%s not found; searched: %v", assistant, filename, searchPaths)
 }
 
 // --- 辅助类型和函数 ---

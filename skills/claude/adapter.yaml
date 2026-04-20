@@ -1,0 +1,29 @@
+# Claude Code Skill Adapter
+# Claude Code 的 Skills 规范为 ~/.claude/skills/<name>/SKILL.md，
+# 安装后可通过 /synapse-knowledge 命令调用，或由 Agent 自动识别触发。
+
+source: claude-code
+
+# 安装目标路径（相对于 targetDir）
+dest_path: .claude/skills/synapse-knowledge/SKILL.md
+
+# 旧版文件路径（安装时清理）
+legacy_paths:
+  - .claude/SYNAPSE.md
+
+# YAML frontmatter
+frontmatter: |
+  ---
+  name: synapse-knowledge
+  description: "Personal knowledge management skill. Automatically collects valuable knowledge from conversations and retrieves existing knowledge to assist answers. Trigger phrases include 'remember this', 'save to knowhub', 'check knowledge base', 'what do I know about X', 'audit'."
+  version: 1.0.0
+  author: tunsuy
+  ---
+
+# 安装后的使用说明
+tips:
+  - "Claude Code 会自动加载 .claude/skills/ 目录下的 Skill。"
+  - "你可以通过 /synapse-knowledge 命令调用，或在对话中自然触发。"
+  - "说 \"remember this\" 或 \"save to knowhub\" 触发知识采集"
+  - "说 \"check knowledge base\" 或 \"audit\" 执行审计"
+  - "说 \"what do I know about X\" 检索已有知识"
