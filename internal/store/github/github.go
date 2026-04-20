@@ -15,6 +15,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/tunsuy/synapse/internal/store/tmpl"
 	"github.com/tunsuy/synapse/pkg/extension"
 	"github.com/tunsuy/synapse/pkg/model"
 )
@@ -112,6 +113,10 @@ func (s *GitHubStore) Init(ctx context.Context, opts extension.InitOptions) erro
 		{
 			path:    "graph/relations.json",
 			content: "{\n  \"version\": \"1.0\",\n  \"nodes\": [],\n  \"edges\": [],\n  \"metadata\": {\n    \"generated\": \"auto\",\n    \"description\": \"Knowledge graph relations — auto-generated from [[wiki-links]]\"\n  }\n}\n",
+		},
+		{
+			path:    "README.md",
+			content: tmpl.GenerateReadme(name),
 		},
 	}
 

@@ -12,6 +12,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/tunsuy/synapse/internal/store/tmpl"
 	"github.com/tunsuy/synapse/pkg/extension"
 	"github.com/tunsuy/synapse/pkg/model"
 )
@@ -194,38 +195,7 @@ Thumbs.db
 
 // writeReadme 写入 README.md
 func (s *LocalStore) writeReadme(name string) error {
-	if name == "" {
-		name = "My"
-	}
-	content := fmt.Sprintf(`# %s's Knowhub
-
-> Powered by [Synapse](https://github.com/tunsuy/synapse) — Personal Knowledge Hub
-
-This is a personal knowledge base, automatically curated from AI conversations.
-
-## 📁 Structure
-
-| Directory | Description |
-|-----------|-------------|
-| `+"`profile/`"+` | User profile and preferences |
-| `+"`topics/`"+` | Topic-based knowledge (organized by subject) |
-| `+"`entities/`"+` | Entities (people, tools, projects, organizations) |
-| `+"`concepts/`"+` | Concepts (technical concepts, methodologies, theories) |
-| `+"`inbox/`"+` | Incoming knowledge buffer (to be organized) |
-| `+"`journal/`"+` | Timeline of knowledge activities |
-| `+"`graph/`"+` | Knowledge graph (auto-generated from [[wiki-links]]) |
-
-## 🔗 Wiki Links
-
-This knowledge base uses `+"`[[wiki-links]]`"+` for connecting related knowledge.
-Compatible with [Obsidian](https://obsidian.md/) — open this repo as a vault!
-
-## 🤖 Powered by Synapse
-
-Knowledge is automatically captured, compiled, and organized from AI assistant conversations.
-Learn more: [github.com/tunsuy/synapse](https://github.com/tunsuy/synapse)
-`, name)
-
+	content := tmpl.GenerateReadme(name)
 	return os.WriteFile(filepath.Join(s.basePath, "README.md"), []byte(content), 0o644)
 }
 
