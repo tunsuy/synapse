@@ -12,6 +12,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/tunsuy/synapse/internal/schema"
 	"github.com/tunsuy/synapse/internal/store/tmpl"
 	"github.com/tunsuy/synapse/pkg/extension"
 	"github.com/tunsuy/synapse/pkg/model"
@@ -85,8 +86,14 @@ func (s *LocalStore) Init(ctx context.Context, opts extension.InitOptions) error
 		return fmt.Errorf("write .gitignore: %w", err)
 	}
 
+	// 从 opts 中提取 schema 对象
+	var schemaObj *schema.Schema
+	if s, ok := opts.SchemaObj.(*schema.Schema); ok && s != nil {
+		schemaObj = s
+	}
+
 	// 写入 README.md
-	if err := s.writeReadme(opts.Name); err != nil {
+	if err := s.writeReadme(opts.Name, schemaObj); err != nil {
 		return fmt.Errorf("write README.md: %w", err)
 	}
 
@@ -194,8 +201,8 @@ Thumbs.db
 }
 
 // writeReadme 写入 README.md
-func (s *LocalStore) writeReadme(name string) error {
-	content := tmpl.GenerateReadme(name)
+func (s *LocalStore) writeReadme(name string, schemaObj *schema.Schema) error {
+	content := tmpl.GenerateReadme(name, schemaObj)
 	return os.WriteFile(filepath.Join(s.basePath, "README.md"), []byte(content), 0o644)
 }
 

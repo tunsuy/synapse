@@ -165,6 +165,7 @@ func initAction(c *cli.Context) error {
 	opts := extension.InitOptions{
 		Name:       c.String("name"),
 		SchemaData: schemaData,
+		SchemaObj:  s,
 		Force:      c.Bool("force"),
 	}
 
@@ -176,13 +177,17 @@ func initAction(c *cli.Context) error {
 	fmt.Println()
 	fmt.Println("📁 Knowledge base structure:")
 	fmt.Println("   ├── .synapse/schema.yaml  # 知识规范")
-	fmt.Println("   ├── profile/me.md         # 用户画像")
-	fmt.Println("   ├── topics/               # 主题知识")
-	fmt.Println("   ├── entities/             # 实体页")
-	fmt.Println("   ├── concepts/             # 概念页")
-	fmt.Println("   ├── inbox/               # 增量缓冲区")
-	fmt.Println("   ├── journal/             # 时间线")
-	fmt.Println("   └── graph/               # 知识图谱")
+	for i, pt := range s.PageTypes {
+		prefix := "├──"
+		if i == len(s.PageTypes)-1 {
+			prefix = "└──"
+		}
+		emoji := ""
+		if pt.Emoji != "" {
+			emoji = pt.Emoji + " "
+		}
+		fmt.Printf("   %s %s%s\n", prefix, emoji, pt.Description)
+	}
 	fmt.Println()
 	fmt.Println("🚀 Next steps:")
 	fmt.Println("   1. Edit profile/me.md to describe yourself")

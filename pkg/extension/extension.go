@@ -65,8 +65,11 @@ type InitOptions struct {
 	// Name 知识库拥有者名称
 	Name string
 
-	// SchemaData schema.yaml 的内容
+	// SchemaData schema.yaml 的序列化内容
 	SchemaData []byte
+
+	// SchemaObj schema 结构体（用于动态生成 README 等场景）
+	SchemaObj interface{}
 
 	// Force 是否强制覆盖已有结构
 	Force bool

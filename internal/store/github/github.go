@@ -15,6 +15,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/tunsuy/synapse/internal/schema"
 	"github.com/tunsuy/synapse/internal/store/tmpl"
 	"github.com/tunsuy/synapse/pkg/extension"
 	"github.com/tunsuy/synapse/pkg/model"
@@ -100,6 +101,12 @@ func (s *GitHubStore) Init(ctx context.Context, opts extension.InitOptions) erro
 		content string
 	}
 
+	// 从 opts 中提取 schema 对象（用于动态生成 README）
+	var schemaObj *schema.Schema
+	if s, ok := opts.SchemaObj.(*schema.Schema); ok && s != nil {
+		schemaObj = s
+	}
+
 	files := []fileEntry{
 		{
 			path:    "profile/me.md",
@@ -116,7 +123,7 @@ func (s *GitHubStore) Init(ctx context.Context, opts extension.InitOptions) erro
 		},
 		{
 			path:    "README.md",
-			content: tmpl.GenerateReadme(name),
+			content: tmpl.GenerateReadme(name, schemaObj),
 		},
 	}
 

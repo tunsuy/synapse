@@ -44,6 +44,12 @@ type PageTypeDefinition struct {
 
 	// Description 类型描述
 	Description string `yaml:"description"`
+
+	// Emoji 目录展示用的 emoji 图标（可选，用于 README 生成等场景）
+	Emoji string `yaml:"emoji,omitempty"`
+
+	// Example 示例文件名（可选，用于 README 表格展示）
+	Example string `yaml:"example,omitempty"`
 }
 
 // FrontmatterSpec Frontmatter 字段规范
@@ -110,13 +116,13 @@ func Default() *Schema {
 	return &Schema{
 		Version: "1.0",
 		PageTypes: []PageTypeDefinition{
-			{Name: "profile", Directory: "profile/", Description: "用户画像"},
-			{Name: "topic", Directory: "topics/", Description: "主题知识"},
-			{Name: "entity", Directory: "entities/", Description: "实体（人物/工具/项目/组织）"},
-			{Name: "concept", Directory: "concepts/", Description: "概念（技术概念/方法论/理论）"},
-			{Name: "inbox", Directory: "inbox/", Description: "增量缓冲区"},
-			{Name: "journal", Directory: "journal/", Description: "时间线"},
-			{Name: "graph", Directory: "graph/", Description: "知识关联图谱"},
+			{Name: "profile", Directory: "profile/", Description: "用户画像", Emoji: "👤", Example: "me.md"},
+			{Name: "topic", Directory: "topics/", Description: "主题知识（按主题组织的深度内容）", Emoji: "📚", Example: "go-concurrency.md"},
+			{Name: "entity", Directory: "entities/", Description: "实体页（人物、工具、项目、组织）", Emoji: "🏷️", Example: "docker.md"},
+			{Name: "concept", Directory: "concepts/", Description: "概念页（技术概念、方法论、理论）", Emoji: "💡", Example: "cap-theorem.md"},
+			{Name: "inbox", Directory: "inbox/", Description: "增量缓冲区（待整理的新知识）", Emoji: "📥", Example: ""},
+			{Name: "journal", Directory: "journal/", Description: "时间线（按时间记录的知识活动）", Emoji: "📅", Example: "2025-01-15.md"},
+			{Name: "graph", Directory: "graph/", Description: "知识关联图谱（从 [[wiki-links]] 自动生成）", Emoji: "🔗", Example: "relations.json"},
 		},
 		Frontmatter: FrontmatterSpec{
 			Required: []string{"type", "title", "created", "updated"},
