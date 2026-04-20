@@ -1,0 +1,118 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: synapse
+    main: ./cmd/synapse
+    binary: synapse
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: default
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - CHANGELOG.md
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: "🚀 Features"
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: "🐛 Bug Fixes"
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: "📚 Documentation"
+      regexp: '^.*?docs(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: "🔧 Maintenance"
+      order: 999
+
+release:
+  github:
+    owner: tunsuy
+    name: synapse
+  draft: false
+  prerelease: auto
+  mode: replace
+  header: |
+    ## Synapse {{ .Tag }}
+
+    Personal Knowledge Hub - Turn every AI conversation into compounding knowledge.
+
+    ### Installation
+
+    ```bash
+    # Via Go
+    go install github.com/tunsuy/synapse@{{ .Tag }}
+
+    # Or download the binary below
+    ```
+  footer: |
+    ---
+    **Full Changelog**: https://github.com/tunsuy/synapse/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+brews:
+  - name: synapse
+    repository:
+      owner: tunsuy
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    commit_author:
+      name: tunsuy
+      email: 957126743@qq.com
+    homepage: https://github.com/tunsuy/synapse
+    description: Personal Knowledge Hub - Turn every AI conversation into compounding knowledge
+    license: Apache-2.0
+    skip_upload: auto
+    install: |
+      bin.install "synapse"
+    test: |
+      system "#{bin}/synapse", "--version"

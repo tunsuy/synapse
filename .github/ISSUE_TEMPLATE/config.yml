@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/tunsuy/synapse/discussions
+    about: Ask questions, share ideas, and connect with the community
+  - name: 📖 Documentation
+    url: https://github.com/tunsuy/synapse#-quick-start
+    about: Read the documentation before opening an issue
+  - name: 🔐 Security Vulnerability
+    url: https://github.com/tunsuy/synapse/security/advisories/new
+    about: Report security vulnerabilities privately
