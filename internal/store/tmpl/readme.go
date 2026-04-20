@@ -20,7 +20,7 @@ func GenerateReadme(name string) string {
 
 ## 📁 目录结构
 
-`+"`"+`
+`+"```"+`
 .
 ├── .synapse/
 │   └── schema.yaml       # 知识库行为契约（定义页面类型、字段规范等）
@@ -35,7 +35,7 @@ func GenerateReadme(name string) string {
 │   └── relations.json    # 🔗 知识图谱（从 [[wiki-links]] 自动生成）
 ├── .gitignore
 └── README.md             # 本文件
-`+"`"+`
+`+"```"+`
 
 ### 各目录说明
 
