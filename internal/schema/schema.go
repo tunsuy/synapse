@@ -116,13 +116,13 @@ func Default() *Schema {
 	return &Schema{
 		Version: "1.0",
 		PageTypes: []PageTypeDefinition{
-			{Name: "profile", Directory: "profile/", Description: "用户画像", Emoji: "👤", Example: "me.md"},
-			{Name: "topic", Directory: "topics/", Description: "主题知识（按主题组织的深度内容）", Emoji: "📚", Example: "go-concurrency.md"},
-			{Name: "entity", Directory: "entities/", Description: "实体页（人物、工具、项目、组织）", Emoji: "🏷️", Example: "docker.md"},
-			{Name: "concept", Directory: "concepts/", Description: "概念页（技术概念、方法论、理论）", Emoji: "💡", Example: "cap-theorem.md"},
-			{Name: "inbox", Directory: "inbox/", Description: "增量缓冲区（待整理的新知识）", Emoji: "📥", Example: ""},
-			{Name: "journal", Directory: "journal/", Description: "时间线（按时间记录的知识活动）", Emoji: "📅", Example: "2025-01-15.md"},
-			{Name: "graph", Directory: "graph/", Description: "知识关联图谱（从 [[wiki-links]] 自动生成）", Emoji: "🔗", Example: "relations.json"},
+			{Name: "profile", Directory: "profile/", Description: "User profile", Emoji: "👤", Example: "me.md"},
+			{Name: "topic", Directory: "topics/", Description: "Topic knowledge (deep content organized by topic)", Emoji: "📚", Example: "go-concurrency.md"},
+			{Name: "entity", Directory: "entities/", Description: "Entity pages (people, tools, projects, organizations)", Emoji: "🏷️", Example: "docker.md"},
+			{Name: "concept", Directory: "concepts/", Description: "Concept pages (technical concepts, methodologies, theories)", Emoji: "💡", Example: "cap-theorem.md"},
+			{Name: "inbox", Directory: "inbox/", Description: "Incremental buffer (new knowledge pending organization)", Emoji: "📥", Example: ""},
+			{Name: "journal", Directory: "journal/", Description: "Timeline (knowledge activities recorded chronologically)", Emoji: "📅", Example: "2025-01-15.md"},
+			{Name: "graph", Directory: "graph/", Description: "Knowledge graph (auto-generated from [[wiki-links]])", Emoji: "🔗", Example: "relations.json"},
 		},
 		Frontmatter: FrontmatterSpec{
 			Required: []string{"type", "title", "created", "updated"},

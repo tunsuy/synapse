@@ -1,31 +1,27 @@
 # CodeBuddy Skill Adapter
-# CodeBuddy 要求 Skill 以子目录形式存在，目录中包含 SKILL.md 文件，
-# 且 SKILL.md 必须包含 YAML front matter（name + description）。
+# CodeBuddy requires Skills as subdirectories containing a SKILL.md file,
+# with YAML front matter (name + description).
 
 source: codebuddy
 
-# 安装目标路径（相对于 targetDir）
+# Install destination path (relative to targetDir)
 dest_path: .codebuddy/skills/synapse-knowledge/SKILL.md
 
-# 旧版文件路径（安装时清理）
+# Legacy file paths (cleaned up during install)
 legacy_paths:
   - .codebuddy/skills/synapse-knowledge.md
 
-# YAML frontmatter
+# YAML frontmatter (uses Go template variables from common metadata)
 frontmatter: |
   ---
-  name: synapse-knowledge
-  description: "个人知识管理助手。在对话中自动采集有价值的知识并沉淀到知识库，同时检索已有知识辅助回答。触发词包括 '记一下', '保存到知识库', '检查知识库', '我知道什么关于X', '复习X', '今天学了什么' 等。"
-  version: 1.0.0
-  author: tunsuy
+  name: {{.Name}}
+  description: "{{.Description}}"
+  version: {{.Version}}
+  author: {{.Author}}
   metadata:
-    tags: [Knowledge-Management, Synapse, GitHub, Personal-Wiki]
+    tags: {{.Tags}}
   ---
 
-# 安装后的使用说明
+# Platform-specific tips (common tips provided by metadata)
 tips:
-  - "CodeBuddy 会自动加载 .codebuddy/skills/ 目录下的 Skill。"
-  - "在对话中，AI 会自动帮你采集和整理知识。"
-  - "说 \"记一下\" 或 \"保存到知识库\" 触发知识采集"
-  - "说 \"检查知识库\" 执行审计"
-  - "说 \"我知道什么关于 X\" 检索已有知识"
+  - "CodeBuddy automatically loads Skills from .codebuddy/skills/ directory."

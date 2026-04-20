@@ -1,27 +1,25 @@
 # Cursor Skill Adapter
-# Cursor 使用 .cursor/rules/*.mdc 格式的规则文件，
-# 每个 .mdc 文件需要包含 YAML frontmatter（description + alwaysApply/globs）。
+# Cursor uses .cursor/rules/*.mdc rule files,
+# each .mdc file needs YAML frontmatter (description + alwaysApply/globs).
 
 source: cursor
 
-# 安装目标路径（相对于 targetDir）
+# Install destination path (relative to targetDir)
 dest_path: .cursor/rules/synapse-knowledge.mdc
 
-# 旧版文件路径（安装时清理）
+# Legacy file paths (cleaned up during install)
 legacy_paths:
   - .cursorrules
 
-# YAML frontmatter
+# YAML frontmatter (uses Go template variables from common metadata)
+# Note: Cursor .mdc format doesn't need name/version/author, but requires alwaysApply
 frontmatter: |
   ---
-  description: "Personal knowledge management skill powered by Synapse. Collects valuable knowledge from conversations and retrieves existing knowledge to assist answers. Triggers: remember this, save to knowhub, check knowledge base, what do I know about X, audit."
+  description: "{{.Description}}"
   alwaysApply: true
   ---
 
-# 安装后的使用说明
+# Platform-specific tips (common tips provided by metadata)
 tips:
-  - "Cursor 会自动加载 .cursor/rules/ 目录下的 .mdc 规则文件。"
-  - "规则设置为 alwaysApply: true，每次对话自动生效。"
-  - "说 \"remember this\" 或 \"save to knowhub\" 触发知识采集"
-  - "说 \"check knowledge base\" 或 \"audit\" 执行审计"
-  - "说 \"what do I know about X\" 检索已有知识"
+  - "Cursor automatically loads .mdc rule files from .cursor/rules/ directory."
+  - "Rule is set to alwaysApply: true, active in every conversation."

@@ -1,0 +1,24 @@
+# Synapse Skill Common Metadata
+# Shared Skill description and basic info for all AI assistant platforms
+# Each platform's adapter.yaml only maintains platform-specific fields
+
+name: synapse-knowledge
+version: 1.0.0
+author: tunsuy
+
+# Skill description — the key signal for AI assistants to decide whether to load this Skill
+description: "Personal knowledge steward. Make every AI conversation compound your knowledge — automatically retrieves existing knowledge to assist answers and continuously identifies valuable knowledge (new concepts, methodologies, lessons learned, best practices, tool recommendations, inspirations, decision rationale) to persist in your knowledge base. Covers all domains: programming, architecture, product thinking, business insights, reading notes, life experience, hobbies, relationships, health, career planning, and more. Triggers: 'remember this', 'save to knowhub', 'check knowledge base', 'what do I know about X', 'review X', 'what did I learn today'."
+
+# Common tags
+tags:
+  - Knowledge-Management
+  - Synapse
+  - GitHub
+  - Personal-Wiki
+
+# Post-install usage tips
+tips:
+  - "AI will automatically retrieve your knowledge base and identify valuable knowledge to persist, making every conversation compound your knowledge."
+  - "Say \"remember this\" or \"save to knowhub\" to explicitly trigger knowledge collection"
+  - "Say \"check knowledge base\" or \"audit\" for knowledge health check"
+  - "Say \"what do I know about X\" or \"review X\" to search existing knowledge"

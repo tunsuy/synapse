@@ -941,8 +941,19 @@ func normalizeAssistantName(name string) string {
 
 // --- Skill 安装核心逻辑 ---
 
-// skillAdapter 定义单个 AI 助手的差异化配置
-// 每个助手在 skills/<name>/adapter.yaml 中定义自己的配置
+// skillMetadata 定义所有 AI 助手共享的 Skill 公共元数据
+// 从 skills/common/metadata.yaml 加载，避免每个平台重复维护
+type skillMetadata struct {
+	Name        string   `yaml:"name"`
+	Version     string   `yaml:"version"`
+	Author      string   `yaml:"author"`
+	Description string   `yaml:"description"`
+	Tags        []string `yaml:"tags"`
+	Tips        []string `yaml:"tips"`
+}
+
+// skillAdapter defines the per-platform adapter configuration.
+// Each assistant has its own skills/<name>/adapter.yaml.
 type skillAdapter struct {
 	Source      string   `yaml:"source"`
 	DestPath    string   `yaml:"dest_path"`
@@ -957,30 +968,42 @@ type skillTemplateData struct {
 	Source      string
 }
 
-// installSkill 通用安装函数：读取通用模板 + adapter 配置 → 渲染 → 写入目标路径
+// installSkill 通用安装函数：读取通用模板 + 公共 metadata + adapter 配置 → 渲染 → 写入目标路径
 func installSkill(assistantKey, targetDir string) error {
-	// 1. 加载 adapter 配置
+	// 1. 加载公共 metadata
+	meta, err := loadMetadata()
+	if err != nil {
+		return fmt.Errorf("load common metadata: %w", err)
+	}
+
+	// 2. 加载 adapter 配置
 	adapter, err := loadAdapter(assistantKey)
 	if err != nil {
 		return fmt.Errorf("load adapter config for %q: %w", assistantKey, err)
 	}
 
-	// 2. 加载通用模板
+	// 3. 将公共 metadata 注入 adapter 的 frontmatter 模板
+	frontmatter, err := renderFrontmatter(adapter, meta)
+	if err != nil {
+		return fmt.Errorf("render frontmatter for %q: %w", assistantKey, err)
+	}
+
+	// 4. 加载通用模板
 	tmplContent, err := findCommonTemplate("SKILL.md.tmpl")
 	if err != nil {
 		return fmt.Errorf("find common template: %w", err)
 	}
 
-	// 3. 渲染模板
+	// 5. 渲染模板
 	rendered, err := renderTemplate(tmplContent, skillTemplateData{
-		Frontmatter: strings.TrimSpace(adapter.Frontmatter),
+		Frontmatter: strings.TrimSpace(frontmatter),
 		Source:      adapter.Source,
 	})
 	if err != nil {
 		return fmt.Errorf("render template for %q: %w", assistantKey, err)
 	}
 
-	// 4. 写入目标文件
+	// 6. 写入目标文件
 	destPath := filepath.Join(targetDir, adapter.DestPath)
 	destDir := filepath.Dir(destPath)
 	if err := os.MkdirAll(destDir, 0755); err != nil {
@@ -991,7 +1014,7 @@ func installSkill(assistantKey, targetDir string) error {
 		return fmt.Errorf("write skill file: %w", err)
 	}
 
-	// 5. 清理旧版本文件
+	// 7. 清理旧版本文件
 	for _, legacy := range adapter.LegacyPaths {
 		oldPath := filepath.Join(targetDir, legacy)
 		if _, statErr := os.Stat(oldPath); statErr == nil {
@@ -1000,18 +1023,19 @@ func installSkill(assistantKey, targetDir string) error {
 		}
 	}
 
-	// 6. 输出安装提示
+	// 8. 输出安装提示
 	fmt.Printf("✅ Skill 已安装到: %s\n", destPath)
-	if len(adapter.Tips) > 0 {
+	tips := mergedTips(adapter, meta)
+	if len(tips) > 0 {
 		fmt.Println("\n📖 使用方法：")
-		for i, tip := range adapter.Tips {
+		for i, tip := range tips {
 			if i < 2 {
 				fmt.Printf("   %s\n", tip)
 			}
 		}
-		if len(adapter.Tips) > 2 {
+		if len(tips) > 2 {
 			fmt.Println("\n💡 提示：")
-			for _, tip := range adapter.Tips[2:] {
+			for _, tip := range tips[2:] {
 				fmt.Printf("   - %s\n", tip)
 			}
 		}
@@ -1039,6 +1063,78 @@ func loadAdapter(assistantKey string) (skillAdapter, error) {
 	}
 
 	return adapter, nil
+}
+
+// loadMetadata 加载公共 Skill 元数据
+// 从 skills/common/metadata.yaml 读取
+func loadMetadata() (skillMetadata, error) {
+	data, err := findCommonTemplate("metadata.yaml")
+	if err != nil {
+		return skillMetadata{}, fmt.Errorf("find common metadata.yaml: %w", err)
+	}
+
+	var meta skillMetadata
+	if err := yaml.Unmarshal(data, &meta); err != nil {
+		return skillMetadata{}, fmt.Errorf("parse metadata.yaml: %w", err)
+	}
+
+	return meta, nil
+}
+
+// renderFrontmatter injects common metadata into the adapter's frontmatter template.
+// adapter.Frontmatter can use Go text/template variables:
+//
+//	{{.Name}}, {{.Version}}, {{.Author}}, {{.Description}}, {{.Tags}}
+func renderFrontmatter(adapter skillAdapter, meta skillMetadata) (string, error) {
+	frontmatterTmpl := adapter.Frontmatter
+
+	// 格式化 tags 为 YAML 数组
+	tagsStr := "["
+	for i, tag := range meta.Tags {
+		if i > 0 {
+			tagsStr += ", "
+		}
+		tagsStr += tag
+	}
+	tagsStr += "]"
+
+	// 构建模板数据
+	type frontmatterData struct {
+		Name        string
+		Version     string
+		Author      string
+		Description string
+		Tags        string
+	}
+
+	data := frontmatterData{
+		Name:        meta.Name,
+		Version:     meta.Version,
+		Author:      meta.Author,
+		Description: meta.Description,
+		Tags:        tagsStr,
+	}
+
+	tmpl, err := template.New("frontmatter").Parse(frontmatterTmpl)
+	if err != nil {
+		return "", fmt.Errorf("parse frontmatter template: %w", err)
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, data); err != nil {
+		return "", fmt.Errorf("execute frontmatter template: %w", err)
+	}
+
+	return buf.String(), nil
+}
+
+// mergedTips combines adapter-specific tips with common metadata tips.
+// Adapter tips (e.g. install-path notes) come first, then common tips from metadata.
+func mergedTips(adapter skillAdapter, meta skillMetadata) []string {
+	var tips []string
+	tips = append(tips, adapter.Tips...)
+	tips = append(tips, meta.Tips...)
+	return tips
 }
 
 // renderTemplate 使用 Go text/template 渲染模板内容
