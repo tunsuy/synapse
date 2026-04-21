@@ -87,12 +87,6 @@ Synapse adopte un **Modèle à Points d'Extension (Extension Point Model)** — 
 
 ## 📸 Démo
 
-### Initialiser la Base de Connaissances
-
-<p align="center">
-  <img src="assets/demo-init.png" alt="synapse init" width="700" />
-</p>
-
 ### Collecter des Connaissances
 
 <p align="center">
@@ -108,10 +102,6 @@ Synapse adopte un **Modèle à Points d'Extension (Extension Point Model)** — 
 ### Skill dans l'Assistant IA
 
 Utilisation du skill synapse-knowledge dans CodeBuddy IDE pour une gestion intelligente des connaissances :
-
-<p align="center">
-  <img src="assets/demo-skill-collect.png" alt="skill collecter connaissances" width="700" />
-</p>
 
 <p align="center">
   <img src="assets/demo-skill-search.png" alt="skill rechercher connaissances" width="700" />

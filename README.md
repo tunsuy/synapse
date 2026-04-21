@@ -87,12 +87,6 @@ Synapse adopts an **Extension Point Model** — a star-shaped architecture with 
 
 ## 📸 Demo
 
-### Initialize Knowledge Base
-
-<p align="center">
-  <img src="assets/demo-init.png" alt="synapse init" width="700" />
-</p>
-
 ### Collect Knowledge
 
 <p align="center">
@@ -108,10 +102,6 @@ Synapse adopts an **Extension Point Model** — a star-shaped architecture with 
 ### Skill in AI Assistant
 
 Using the synapse-knowledge skill in CodeBuddy IDE for intelligent knowledge management:
-
-<p align="center">
-  <img src="assets/demo-skill-collect.png" alt="skill collect knowledge" width="700" />
-</p>
 
 <p align="center">
   <img src="assets/demo-skill-search.png" alt="skill search knowledge" width="700" />

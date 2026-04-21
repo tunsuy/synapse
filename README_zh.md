@@ -87,12 +87,6 @@ Synapse 采用 **扩展点模型（Extension Point Model）**，以 Store 为底
 
 ## 📸 演示
 
-### 初始化知识库
-
-<p align="center">
-  <img src="assets/demo-init.png" alt="synapse init" width="700" />
-</p>
-
 ### 采集知识
 
 <p align="center">
@@ -108,10 +102,6 @@ Synapse 采用 **扩展点模型（Extension Point Model）**，以 Store 为底
 ### AI 助手中的 Skill 试用
 
 在 CodeBuddy IDE 中使用 synapse-knowledge skill 进行智能知识管理：
-
-<p align="center">
-  <img src="assets/demo-skill-collect.png" alt="skill 采集知识" width="700" />
-</p>
 
 <p align="center">
   <img src="assets/demo-skill-search.png" alt="skill 搜索知识" width="700" />

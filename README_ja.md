@@ -87,12 +87,6 @@ Synapse は **拡張ポイントモデル（Extension Point Model）** を採用
 
 ## 📸 デモ
 
-### ナレッジベースの初期化
-
-<p align="center">
-  <img src="assets/demo-init.png" alt="synapse init" width="700" />
-</p>
-
 ### ナレッジの収集
 
 <p align="center">
@@ -108,10 +102,6 @@ Synapse は **拡張ポイントモデル（Extension Point Model）** を採用
 ### AIアシスタントでのSkill使用
 
 CodeBuddy IDEでsynapse-knowledge skillを使用したインテリジェントなナレッジ管理：
-
-<p align="center">
-  <img src="assets/demo-skill-collect.png" alt="skill ナレッジ収集" width="700" />
-</p>
 
 <p align="center">
   <img src="assets/demo-skill-search.png" alt="skill ナレッジ検索" width="700" />
