@@ -9,6 +9,15 @@
   AI 어시스턴트와의 대화에서 자동으로 지식을 축적, 정리, 환원하여 모든 AI 대화를 지식 복리로 만듭니다.
 </p>
 
+<p align="center">
+  <img src="assets/hero-banner.png" alt="Synapse 워크플로우" width="800" />
+</p>
+
+[![CI](https://github.com/tunsuy/synapse/actions/workflows/ci.yml/badge.svg)](https://github.com/tunsuy/synapse/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tunsuy/synapse)](https://goreportcard.com/report/github.com/tunsuy/synapse)
+[![codecov](https://codecov.io/gh/tunsuy/synapse/branch/main/graph/badge.svg)](https://codecov.io/gh/tunsuy/synapse)
+[![Go Reference](https://pkg.go.dev/badge/github.com/tunsuy/synapse.svg)](https://pkg.go.dev/github.com/tunsuy/synapse)
+[![Release](https://img.shields.io/github/v/release/tunsuy/synapse?include_prereleases)](https://github.com/tunsuy/synapse/releases)
 [![Go Version](https://img.shields.io/badge/Go-%3E%3D1.24-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -73,6 +82,40 @@ Synapse는 **확장 포인트 모델(Extension Point Model)** 을 채택 — Sto
 ```
 
 > 자세한 아키텍처 설명은 [ARCHITECTURE.md](ARCHITECTURE.md)를 참조하세요.
+
+---
+
+## 📸 데모
+
+### 지식 베이스 초기화
+
+<p align="center">
+  <img src="assets/demo-init.png" alt="synapse init" width="700" />
+</p>
+
+### 지식 수집
+
+<p align="center">
+  <img src="assets/demo-collect.png" alt="synapse collect" width="700" />
+</p>
+
+### 지식 베이스 검색
+
+<p align="center">
+  <img src="assets/demo-search.png" alt="synapse search" width="700" />
+</p>
+
+### AI 어시스턴트에서의 Skill 사용
+
+CodeBuddy IDE에서 synapse-knowledge skill을 사용한 지능형 지식 관리:
+
+<p align="center">
+  <img src="assets/demo-skill-collect.png" alt="skill 지식 수집" width="700" />
+</p>
+
+<p align="center">
+  <img src="assets/demo-skill-search.png" alt="skill 지식 검색" width="700" />
+</p>
 
 ---
 

@@ -9,6 +9,10 @@
   Automatically distill, organize, and reinvest knowledge from your AI conversations, turning every chat into compounding knowledge.
 </p>
 
+<p align="center">
+  <img src="assets/hero-banner.png" alt="Synapse Workflow" width="800" />
+</p>
+
 [![CI](https://github.com/tunsuy/synapse/actions/workflows/ci.yml/badge.svg)](https://github.com/tunsuy/synapse/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tunsuy/synapse)](https://goreportcard.com/report/github.com/tunsuy/synapse)
 [![codecov](https://codecov.io/gh/tunsuy/synapse/branch/main/graph/badge.svg)](https://codecov.io/gh/tunsuy/synapse)
@@ -78,6 +82,40 @@ Synapse adopts an **Extension Point Model** — a star-shaped architecture with 
 ```
 
 > For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
+---
+
+## 📸 Demo
+
+### Initialize Knowledge Base
+
+<p align="center">
+  <img src="assets/demo-init.png" alt="synapse init" width="700" />
+</p>
+
+### Collect Knowledge
+
+<p align="center">
+  <img src="assets/demo-collect.png" alt="synapse collect" width="700" />
+</p>
+
+### Search Knowledge Base
+
+<p align="center">
+  <img src="assets/demo-search.png" alt="synapse search" width="700" />
+</p>
+
+### Skill in AI Assistant
+
+Using the synapse-knowledge skill in CodeBuddy IDE for intelligent knowledge management:
+
+<p align="center">
+  <img src="assets/demo-skill-collect.png" alt="skill collect knowledge" width="700" />
+</p>
+
+<p align="center">
+  <img src="assets/demo-skill-search.png" alt="skill search knowledge" width="700" />
+</p>
 
 ---
 
