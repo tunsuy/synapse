@@ -128,7 +128,7 @@ Using the synapse-knowledge skill in CodeBuddy IDE for intelligent knowledge man
 ### Installation
 
 ```bash
-go install github.com/tunsuy/synapse@latest
+go install github.com/tunsuy/synapse/cmd/synapse@latest
 ```
 
 On the first run of any synapse command, a global configuration template will be automatically created at `~/.synapse/config.yaml`:

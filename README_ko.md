@@ -87,12 +87,6 @@ Synapse는 **확장 포인트 모델(Extension Point Model)** 을 채택 — Sto
 
 ## 📸 데모
 
-### 지식 베이스 초기화
-
-<p align="center">
-  <img src="assets/demo-init.png" alt="synapse init" width="700" />
-</p>
-
 ### 지식 수집
 
 <p align="center">
@@ -110,10 +104,6 @@ Synapse는 **확장 포인트 모델(Extension Point Model)** 을 채택 — Sto
 CodeBuddy IDE에서 synapse-knowledge skill을 사용한 지능형 지식 관리:
 
 <p align="center">
-  <img src="assets/demo-skill-collect.png" alt="skill 지식 수집" width="700" />
-</p>
-
-<p align="center">
   <img src="assets/demo-skill-search.png" alt="skill 지식 검색" width="700" />
 </p>
 
@@ -128,7 +118,7 @@ CodeBuddy IDE에서 synapse-knowledge skill을 사용한 지능형 지식 관리
 ### 설치
 
 ```bash
-go install github.com/tunsuy/synapse@latest
+go install github.com/tunsuy/synapse/cmd/synapse@latest
 ```
 
 ### 지식 베이스 초기화

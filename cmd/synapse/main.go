@@ -25,6 +25,11 @@ import (
 var version = "dev"
 
 func main() {
+	// 在 app.Run() 之前确保全局配置文件存在
+	// 注意：urfave/cli 的 Before 钩子在 --help/--version 时不会执行
+	// 因此需要在这里提前初始化，保证安装后首次执行任何命令都能创建配置文件
+	ensureGlobalConfigOnStart()
+
 	app := &cli.App{
 		Name:    "synapse",
 		Usage:   "Personal Knowledge Hub — 个人知识中枢",
@@ -39,22 +44,6 @@ func main() {
   - Indexer:   检索引擎（知识库检索）
   - Consumer:  消费端（知识输出为各种形式）
   - Auditor:   质量审计（知识库健康检查）`,
-		Before: func(c *cli.Context) error {
-			// 自动确保全局配置文件存在
-			cfgPath, created, err := config.EnsureGlobalConfig()
-			if err != nil {
-				// 非致命错误，仅告警
-				log.Printf("WARN: ensure global config: %v", err)
-				return nil
-			}
-			if created {
-				fmt.Printf("📝 Created global config template: %s\n", cfgPath)
-				fmt.Println("   Please edit this file to configure your store and extensions.")
-				fmt.Println("   Then run 'synapse check' to verify your configuration.")
-				fmt.Println()
-			}
-			return nil
-		},
 		Commands: []*cli.Command{
 			initCommand(),
 			checkCommand(),
@@ -418,6 +407,24 @@ func init() {
 	_ = strings.TrimSpace(version)
 }
 
+// ensureGlobalConfigOnStart 在 app.Run() 之前确保全局配置文件存在
+// 这个函数必须在 main() 中 app.Run() 之前调用，而不是放在 Before 钩子中
+// 原因：urfave/cli 的 Before 钩子在 --help/--version 时不会执行
+func ensureGlobalConfigOnStart() {
+	cfgPath, created, err := config.EnsureGlobalConfig()
+	if err != nil {
+		// 非致命错误，仅告警，不影响程序运行
+		log.Printf("WARN: ensure global config: %v", err)
+		return
+	}
+	if created {
+		fmt.Printf("📝 Created global config template: %s\n", cfgPath)
+		fmt.Println("   Please edit this file to configure your store and extensions.")
+		fmt.Println("   Then run 'synapse check' to verify your configuration.")
+		fmt.Println()
+	}
+}
+
 // collectCommand 返回 collect 子命令
 func collectCommand() *cli.Command {
 	return &cli.Command{
@@ -437,8 +444,7 @@ func collectCommand() *cli.Command {
 			&cli.StringFlag{
 				Name:    "config",
 				Aliases: []string{"c"},
-				Usage:   "配置文件路径（默认 .synapse/config.yaml）",
-				Value:   ".synapse/config.yaml",
+				Usage:   "配置文件路径（默认 ~/.synapse/config.yaml）",
 			},
 			&cli.StringFlag{
 				Name:  "content",
@@ -525,8 +531,18 @@ func collectAction(c *cli.Context) error {
 		fetchConfig["session_id"] = sessionID
 	}
 
+	// 确定配置文件路径
+	cfgPath := c.String("config")
+	if cfgPath == "" {
+		var err error
+		cfgPath, err = config.GlobalConfigPath()
+		if err != nil {
+			return fmt.Errorf("get global config path: %w", err)
+		}
+	}
+
 	// 创建引擎
-	eng, err := engine.New(c.String("config"))
+	eng, err := engine.New(cfgPath)
 	if err != nil {
 		return fmt.Errorf("create engine: %w", err)
 	}
@@ -565,8 +581,7 @@ M2 阶段使用基于文件遍历 + 文本匹配的简单搜索。
 			&cli.StringFlag{
 				Name:    "config",
 				Aliases: []string{"c"},
-				Usage:   "配置文件路径（默认 .synapse/config.yaml）",
-				Value:   ".synapse/config.yaml",
+				Usage:   "配置文件路径（默认 ~/.synapse/config.yaml）",
 			},
 			&cli.StringFlag{
 				Name:  "type",
@@ -590,8 +605,18 @@ func searchAction(c *cli.Context) error {
 		return fmt.Errorf("search query is required; usage: synapse search <query>")
 	}
 
+	// 确定配置文件路径
+	cfgPath := c.String("config")
+	if cfgPath == "" {
+		var err error
+		cfgPath, err = config.GlobalConfigPath()
+		if err != nil {
+			return fmt.Errorf("get global config path: %w", err)
+		}
+	}
+
 	// 创建引擎
-	eng, err := engine.New(c.String("config"))
+	eng, err := engine.New(cfgPath)
 	if err != nil {
 		return fmt.Errorf("create engine: %w", err)
 	}
@@ -682,8 +707,7 @@ M2 阶段的基础审计包括：
 			&cli.StringFlag{
 				Name:    "config",
 				Aliases: []string{"c"},
-				Usage:   "配置文件路径（默认 .synapse/config.yaml）",
-				Value:   ".synapse/config.yaml",
+				Usage:   "配置文件路径（默认 ~/.synapse/config.yaml）",
 			},
 		},
 		Action: auditAction,
@@ -692,8 +716,18 @@ M2 阶段的基础审计包括：
 
 // auditAction 执行 audit 命令
 func auditAction(c *cli.Context) error {
+	// 确定配置文件路径
+	cfgPath := c.String("config")
+	if cfgPath == "" {
+		var err error
+		cfgPath, err = config.GlobalConfigPath()
+		if err != nil {
+			return fmt.Errorf("get global config path: %w", err)
+		}
+	}
+
 	// 创建引擎
-	eng, err := engine.New(c.String("config"))
+	eng, err := engine.New(cfgPath)
 	if err != nil {
 		return fmt.Errorf("create engine: %w", err)
 	}
