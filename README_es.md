@@ -9,6 +9,15 @@
   Destila, organiza y reinvierte automáticamente el conocimiento de tus conversaciones con IA, convirtiendo cada interacción en capital de conocimiento compuesto.
 </p>
 
+<p align="center">
+  <img src="assets/hero-banner.png" alt="Synapse Flujo de Trabajo" width="800" />
+</p>
+
+[![CI](https://github.com/tunsuy/synapse/actions/workflows/ci.yml/badge.svg)](https://github.com/tunsuy/synapse/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tunsuy/synapse)](https://goreportcard.com/report/github.com/tunsuy/synapse)
+[![codecov](https://codecov.io/gh/tunsuy/synapse/branch/main/graph/badge.svg)](https://codecov.io/gh/tunsuy/synapse)
+[![Go Reference](https://pkg.go.dev/badge/github.com/tunsuy/synapse.svg)](https://pkg.go.dev/github.com/tunsuy/synapse)
+[![Release](https://img.shields.io/github/v/release/tunsuy/synapse?include_prereleases)](https://github.com/tunsuy/synapse/releases)
 [![Go Version](https://img.shields.io/badge/Go-%3E%3D1.24-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -73,6 +82,40 @@ Synapse adopta un **Modelo de Puntos de Extensión (Extension Point Model)** —
 ```
 
 > Para documentación detallada de la arquitectura, consulta [ARCHITECTURE.md](ARCHITECTURE.md).
+
+---
+
+## 📸 Demo
+
+### Inicializar Base de Conocimiento
+
+<p align="center">
+  <img src="assets/demo-init.png" alt="synapse init" width="700" />
+</p>
+
+### Recopilar Conocimiento
+
+<p align="center">
+  <img src="assets/demo-collect.png" alt="synapse collect" width="700" />
+</p>
+
+### Buscar en la Base de Conocimiento
+
+<p align="center">
+  <img src="assets/demo-search.png" alt="synapse search" width="700" />
+</p>
+
+### Skill en Asistente de IA
+
+Usando el skill synapse-knowledge en CodeBuddy IDE para gestión inteligente de conocimiento:
+
+<p align="center">
+  <img src="assets/demo-skill-collect.png" alt="skill recopilar conocimiento" width="700" />
+</p>
+
+<p align="center">
+  <img src="assets/demo-skill-search.png" alt="skill buscar conocimiento" width="700" />
+</p>
 
 ---
 

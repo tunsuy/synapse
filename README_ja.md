@@ -9,6 +9,15 @@
   AIアシスタントとの会話から自動的にナレッジを蓄積・整理・活用し、すべてのAI会話をナレッジの複利に変えます。
 </p>
 
+<p align="center">
+  <img src="assets/hero-banner.png" alt="Synapse ワークフロー" width="800" />
+</p>
+
+[![CI](https://github.com/tunsuy/synapse/actions/workflows/ci.yml/badge.svg)](https://github.com/tunsuy/synapse/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tunsuy/synapse)](https://goreportcard.com/report/github.com/tunsuy/synapse)
+[![codecov](https://codecov.io/gh/tunsuy/synapse/branch/main/graph/badge.svg)](https://codecov.io/gh/tunsuy/synapse)
+[![Go Reference](https://pkg.go.dev/badge/github.com/tunsuy/synapse.svg)](https://pkg.go.dev/github.com/tunsuy/synapse)
+[![Release](https://img.shields.io/github/v/release/tunsuy/synapse?include_prereleases)](https://github.com/tunsuy/synapse/releases)
 [![Go Version](https://img.shields.io/badge/Go-%3E%3D1.24-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -73,6 +82,40 @@ Synapse は **拡張ポイントモデル（Extension Point Model）** を採用
 ```
 
 > 詳細なアーキテクチャ説明は [ARCHITECTURE.md](ARCHITECTURE.md) を参照してください。
+
+---
+
+## 📸 デモ
+
+### ナレッジベースの初期化
+
+<p align="center">
+  <img src="assets/demo-init.png" alt="synapse init" width="700" />
+</p>
+
+### ナレッジの収集
+
+<p align="center">
+  <img src="assets/demo-collect.png" alt="synapse collect" width="700" />
+</p>
+
+### ナレッジベースの検索
+
+<p align="center">
+  <img src="assets/demo-search.png" alt="synapse search" width="700" />
+</p>
+
+### AIアシスタントでのSkill使用
+
+CodeBuddy IDEでsynapse-knowledge skillを使用したインテリジェントなナレッジ管理：
+
+<p align="center">
+  <img src="assets/demo-skill-collect.png" alt="skill ナレッジ収集" width="700" />
+</p>
+
+<p align="center">
+  <img src="assets/demo-skill-search.png" alt="skill ナレッジ検索" width="700" />
+</p>
 
 ---
 
