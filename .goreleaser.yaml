@@ -91,7 +91,7 @@ release:
 
     ```bash
     # Via Go
-    go install github.com/tunsuy/synapse@{{ .Tag }}
+    go install github.com/tunsuy/synapse/cmd/synapse@{{ .Tag }}
 
     # Or download the binary below
     ```

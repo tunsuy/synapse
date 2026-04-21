@@ -128,7 +128,7 @@ Utilisation du skill synapse-knowledge dans CodeBuddy IDE pour une gestion intel
 ### Installation
 
 ```bash
-go install github.com/tunsuy/synapse@latest
+go install github.com/tunsuy/synapse/cmd/synapse@latest
 ```
 
 Lors de la première exécution d'une commande synapse, un modèle de configuration globale sera automatiquement créé dans `~/.synapse/config.yaml` :

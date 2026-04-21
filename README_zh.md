@@ -128,7 +128,7 @@ Synapse 采用 **扩展点模型（Extension Point Model）**，以 Store 为底
 ### 安装
 
 ```bash
-go install github.com/tunsuy/synapse@latest
+go install github.com/tunsuy/synapse/cmd/synapse@latest
 ```
 
 首次运行任意 synapse 命令时，会自动在 `~/.synapse/config.yaml` 创建全局配置模板：

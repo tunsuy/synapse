@@ -87,12 +87,6 @@ Synapse adopta un **Modelo de Puntos de Extensión (Extension Point Model)** —
 
 ## 📸 Demo
 
-### Inicializar Base de Conocimiento
-
-<p align="center">
-  <img src="assets/demo-init.png" alt="synapse init" width="700" />
-</p>
-
 ### Recopilar Conocimiento
 
 <p align="center">
@@ -110,10 +104,6 @@ Synapse adopta un **Modelo de Puntos de Extensión (Extension Point Model)** —
 Usando el skill synapse-knowledge en CodeBuddy IDE para gestión inteligente de conocimiento:
 
 <p align="center">
-  <img src="assets/demo-skill-collect.png" alt="skill recopilar conocimiento" width="700" />
-</p>
-
-<p align="center">
   <img src="assets/demo-skill-search.png" alt="skill buscar conocimiento" width="700" />
 </p>
 
@@ -128,7 +118,7 @@ Usando el skill synapse-knowledge en CodeBuddy IDE para gestión inteligente de 
 ### Instalación
 
 ```bash
-go install github.com/tunsuy/synapse@latest
+go install github.com/tunsuy/synapse/cmd/synapse@latest
 ```
 
 En la primera ejecución de cualquier comando synapse, se creará automáticamente una plantilla de configuración global en `~/.synapse/config.yaml`:
