@@ -37,9 +37,12 @@ archives:
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
+    formats:
+      - tar.gz
     format_overrides:
       - goos: windows
-        format: zip
+        formats:
+          - zip
     files:
       - README.md
       - LICENSE
@@ -98,21 +101,3 @@ release:
   footer: |
     ---
     **Full Changelog**: https://github.com/tunsuy/synapse/compare/{{ .PreviousTag }}...{{ .Tag }}
-
-brews:
-  - name: synapse
-    repository:
-      owner: tunsuy
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    commit_author:
-      name: tunsuy
-      email: 957126743@qq.com
-    homepage: https://github.com/tunsuy/synapse
-    description: Personal Knowledge Hub - Turn every AI conversation into compounding knowledge
-    license: Apache-2.0
-    skip_upload: auto
-    install: |
-      bin.install "synapse"
-    test: |
-      system "#{bin}/synapse", "--version"
